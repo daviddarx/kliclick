@@ -1,2 +1,2 @@
 # pixels
-Random Pictures without briefings and constraints
+Random pictures without briefings and constraints
