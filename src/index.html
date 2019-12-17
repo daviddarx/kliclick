@@ -13,12 +13,15 @@
 
 	<body>
 
-    <each loop="picture in content.pictures">
-      <div class="picture">
-        <img src="../static/images/!!picture!!"></include>
-      </div>
-    </each>
+    <buttton class="lightmode-button"></buttton>
 
+    <div class="pictures">
+      <each loop="picture in content.pictures">
+        <div class="picture">
+          <img rel="images/!!picture!!" class="picture__el"></include>
+        </div>
+      </each>
+    </div>
 
 		<script src="/index.js"></script>
 	</body>

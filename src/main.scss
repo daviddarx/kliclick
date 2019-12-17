@@ -1,25 +1,6 @@
 
 @import 'reset-css/reset.css';
 
-body,
-html {
-  width: 100%;
-  height: 100%;
-}
-
-body {
-  color: #fff;
-  background-color: rgba(0, 0, 0, 0.9);
-  font-family: Arial, Arial, Helvetica, sans-serif;
-  width: 100%;
-}
-
-img {
-  width: 100%;
-  max-width: 800px;
-  margin: 5vw;
-}
-
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
 }
@@ -28,4 +9,82 @@ img {
   background: #fff;
   color: #000;
   text-shadow: none;
+}
+
+html {
+  --s-picture-margin-bottom: 10vw;
+  --c-background: rgba(0, 0, 0, 1);
+  --c-interaction: #fff;
+}
+
+body {
+  background-color: var(--c-background);
+  font-family: Arial, Helvetica, sans-serif;
+
+  &.is-inverted {
+    --c-background: #fff;
+    --c-interaction: rgba(0, 0, 0, 1);
+  }
+}
+
+.lightmode-button {
+  --s-button: 24px;
+  --s-margin: 40px;
+
+  cursor: pointer;
+  position: fixed;
+  z-index: 100;
+  overflow: hidden;
+  top: var(--s-margin);
+  right: var(--s-margin);
+  width: var(--s-button);
+  height: var(--s-button);
+  border-radius: 100%;
+  border: 1px solid var(--c-interaction);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: calc(var(--s-button) * 0.5);
+    height: var(--s-button);
+    background-color: var(--c-interaction);
+    transition: width ease-out 0.2s;
+  }
+
+  &:hover {
+    &::before {
+      width: var(--s-button);
+    }
+  }
+}
+
+.pictures {
+  margin: 0 auto;
+  padding-bottom: var(--s-picture-margin-bottom);
+}
+
+.picture {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  margin-top: var(--s-picture-margin-bottom);
+  box-sizing: border-box;
+
+  &.is-loaded {
+    display: block;
+  }
+
+  &:nth-child(2n) {
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  &__el {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
 }
