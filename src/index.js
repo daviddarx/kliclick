@@ -11,7 +11,7 @@ const Picture = function () {
     widthRatioToWindow: 0.8,
     height: 0,
     heightRatioToWidth: 0,
-    heightRatioToWindow: 0.8
+    heightRatioToWindow: 0.9 // augmenter en fonction du ratio, pour ecrans très larges comme macboo?
   };
 
   this.refs = {
@@ -65,8 +65,6 @@ const Picture = function () {
 
       let maxHeight = this.settings.windowHMax * this.settings.heightRatioToWindow;
 
-      console.log(maxHeight);
-
       if (this.settings.height > maxHeight) {
         this.settings.height = maxHeight;
         this.settings.width = this.settings.height* this.settings.widthRatioToHeight;
@@ -76,7 +74,7 @@ const Picture = function () {
       this.refs.$div.style.height = this.settings.height + 'px';
     }
   };
-}
+};
 
 const Pictures = function () {
   this.settings = {
@@ -127,7 +125,7 @@ const Pictures = function () {
       pictureItem.resize();
     });
   };
-}
+};
 
 let pictures = undefined;
 
@@ -138,11 +136,29 @@ const $lightmodeButton = document.querySelector('.lightmode-button');
 
 const toggleLightmode = () => {
   document.body.classList.toggle('is-inverted');
-}
+};
 
 $lightmodeButton.addEventListener('click', toggleLightmode);
 $lightmodeButton.addEventListener('touchstart', toggleLightmode);
 
+
+
+//navigation
+const $navigationPrev = document.querySelector('.navigation-button--prev');
+const $navigationNext = document.querySelector('.navigation-button--next');
+
+const navigate = (e) => {
+  if (e.currentTarget == $navigationPrev) {
+    console.log("prev");
+  } else {
+    console.log("next");
+  }
+};
+
+$navigationPrev.addEventListener('click', navigate);
+$navigationPrev.addEventListener('touchstart', navigate);
+$navigationNext.addEventListener('click', navigate);
+$navigationNext.addEventListener('touchstart', navigate);
 
 
 //general
@@ -165,6 +181,6 @@ const init = () => {
 
   window.addEventListener('resize', resizeListener);
   resizeListener();
-}
+};
 
 init();

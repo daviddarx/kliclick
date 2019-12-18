@@ -13,7 +13,7 @@
 
 html {
   --s-picture-margin-bottom: 10vw;
-  --c-background: rgba(0, 0, 0, 1);
+  --c-background: rgba(0, 0, 0, 0.95);
   --c-interaction: #fff;
 }
 
@@ -23,7 +23,7 @@ body {
 
   &.is-inverted {
     --c-background: #fff;
-    --c-interaction: rgba(0, 0, 0, 1);
+    --c-interaction: rgba(0, 0, 0, 0.95);
   }
 }
 
@@ -58,6 +58,32 @@ body {
     &::before {
       width: var(--s-button);
     }
+  }
+}
+
+.navigation-button {
+  --s-height: 48px;
+  --s-width: 24px;
+  --s-margin: 40px;
+  --s-spacing: 16px;
+
+  position: fixed;
+  cursor: pointer;
+  z-index: 100;
+  bottom: var(--s-margin);
+  right: var(--s-margin);
+  width: var(--s-width);
+  height: var(--s-height);
+
+  &--prev {
+    bottom: calc(var(--s-margin) + var(--s-height) + var(--s-spacing));
+  }
+
+  &__line {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: green;
   }
 }
 
