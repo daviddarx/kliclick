@@ -1,4 +1,5 @@
-import { EWOULDBLOCK } from "constants";
+import smoothscroll from 'smoothscroll-polyfill';
+smoothscroll.polyfill();
 
 //pictures
 const Picture = function () {
