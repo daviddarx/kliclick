@@ -20,7 +20,7 @@
   },
   "scripts": {
     "start": "parcel ./src/index.html",
-    "build": "parcel build ./src/index.html --public-url ./",
+    "build": "parcel build ./src/index.html",
     "test": "npm run build",
     "clean": "rm -rf .cache/ && rm -rf dist/"
   },
