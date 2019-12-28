@@ -89,7 +89,8 @@ const Pictures = function () {
     loadCurrentID: 0,
     totalPictures: 0,
     currentID: 0,
-    currentIDObserver: 0
+    currentIDObserver: 0,
+    observerWindowHRatio: 0.75
   };
 
   this.refs = {
@@ -118,6 +119,9 @@ const Pictures = function () {
 
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
+      if (i%2 == 0) {
+        picture.classList.add('is-even');
+      }
       const pictureItem = new Picture();
             pictureItem.init(picture, i);
       this.refs.picturesRep.push(pictureItem);
@@ -130,12 +134,16 @@ const Pictures = function () {
     this.setObserver();
   };
 
+
+
   this.setObserver = () => {
     if(!!window.IntersectionObserver){
       this.refs.observer = new IntersectionObserver(this.observerListener, {
-        rootMargin: `0px 0px -${ (windowH) * 0.75 }px 0px`
+        rootMargin: `0px 0px -${ (windowH) * this.settings.observerWindowHRatio }px 0px`
       });
+
       this.refs.$pictures.forEach(picture => {
+        picture.querySelector('.picture__mask').classList.remove('is-hidden');
         this.refs.observer.observe(picture);
       });
     }
@@ -152,7 +160,8 @@ const Pictures = function () {
 
   this.observerListener = (entries, observer) => {
     entries.forEach(entry => {
-      if(entry.isIntersecting == true){
+      if (entry.isIntersecting == true) {
+        entry.target.classList.add('is-active');
         this.settings.currentIDObserver = parseInt(entry.target.getAttribute('rel'));
       }
     });
