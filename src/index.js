@@ -192,7 +192,7 @@ const Pictures = function () {
 
   this.setPictureNext = () => {
     if (this.settings.currentID != this.settings.currentIDObserver) {
-      this.settings.currentID = this.settings.currentIDObserver;
+      this.settings.currentID = this.settings.currentIDObserver + 1;
     }
 
     if (this.settings.currentID < this.settings.totalPictures - 1 ) {
