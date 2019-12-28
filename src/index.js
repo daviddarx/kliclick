@@ -47,10 +47,6 @@ const Picture = function () {
       this.settings.imgWidth = this.refs.$img.naturalWidth;
       this.settings.imgHeight = this.refs.$img.naturalHeight;
 
-      console.log(this.settings.id);
-      console.log(this.settings.imgWidth + " " + this.settings.imgHeight);
-      console.log("----");
-
       this.settings.widthRatioToHeight = this.settings.imgWidth / this.settings.imgHeight;
       this.settings.heightRatioToWidth = this.settings.imgHeight / this.settings.imgWidth;
 
@@ -74,8 +70,6 @@ const Picture = function () {
       this.settings.width = this.settings.windowWMax * this.settings.widthRatioToWindow;
       this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
 
-      //console.log(this.settings.heightRatioToWidth);
-
       let maxHeight = this.settings.windowHMax * this.settings.heightRatioToWindow;
 
       if (this.settings.height > maxHeight) {
@@ -85,10 +79,6 @@ const Picture = function () {
 
       this.refs.$div.style.width = this.settings.width + 'px';
       this.refs.$div.style.height = this.settings.height + 'px';
-
-      // console.log(this.settings.id);
-      // console.log(maxHeight + " " + this.settings.height + " ");
-      // console.log("----");
     }
   };
 };
