@@ -143,7 +143,7 @@ const Pictures = function () {
       });
 
       this.refs.$pictures.forEach(picture => {
-        picture.querySelector('.picture__mask').classList.remove('is-hidden');
+        picture.classList.add('is-masked');
         this.refs.observer.observe(picture);
       });
     }

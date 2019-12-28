@@ -175,18 +175,29 @@ body {
     display: block;
     width: 100%;
     max-width: 100%;
+    transition: transform var(--e-out) 1.5s;
+    will-change: transform;
+
+    #{$root}.is-masked & {
+      transform: scale(1.5);
+    }
+
+    #{$root}.is-masked.is-active & {
+      transform: scale(1);
+    }
   }
 
   &__mask {
     position: absolute;
-    display: flex;
-    top: calc(var(--s-picture-margin-bottom) * 0.5);
+    display: none;
+    z-index: 100;
     left: 0;
     width: 100%;
     height: 100%;
+    top: calc(var(--s-picture-margin-bottom) * -0.5);
 
-    &.is-hidden {
-      display: none;
+    #{$root}.is-masked & {
+      display: flex;
     }
   }
 
