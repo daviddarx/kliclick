@@ -88,7 +88,8 @@ const Pictures = function () {
     maxWindowWidth: 1440,
     loadCurrentID: 0,
     totalPictures: 0,
-    currentID: 0
+    currentID: 0,
+    currentIDObserver: 0
   };
 
   this.refs = {
@@ -96,7 +97,8 @@ const Pictures = function () {
     $pictures: undefined,
     picturesRep: undefined,
     $navPrev: undefined,
-    $navNext: undefined
+    $navNext: undefined,
+    observer: undefined
   };
 
   this.init = () => {
@@ -115,6 +117,7 @@ const Pictures = function () {
     window.addEventListener('keydown', this.navigationKeyboard, false);
 
     this.refs.$pictures.forEach((picture, i) => {
+      picture.setAttribute('rel', i);
       const pictureItem = new Picture();
             pictureItem.init(picture, i);
       this.refs.picturesRep.push(pictureItem);
@@ -123,6 +126,36 @@ const Pictures = function () {
     this.settings.totalPictures = this.refs.picturesRep.length;
 
     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
+
+    this.setObserver();
+  };
+
+  this.setObserver = () => {
+    if(!!window.IntersectionObserver){
+      this.refs.observer = new IntersectionObserver(this.observerListener, {
+        rootMargin: `0px 0px -${ (windowH) * 0.75 }px 0px`
+      });
+      this.refs.$pictures.forEach(picture => {
+        this.refs.observer.observe(picture);
+      });
+    }
+  };
+
+  this.resetObserver = () => {
+    if(!!window.IntersectionObserver && this.refs.observer != undefined){
+      this.refs.$pictures.forEach(picture => {
+        this.refs.observer.unobserve(picture);
+      })
+      this.refs.observer = undefined;
+    }
+  };
+
+  this.observerListener = (entries, observer) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting == true){
+        this.settings.currentIDObserver = parseInt(entry.target.getAttribute('rel'));
+      }
+    });
   };
 
   this.loadComplete = () => {
@@ -135,21 +168,29 @@ const Pictures = function () {
 
   this.scrollToPicture = () => {
     this.refs.$pictures[this.settings.currentID].scrollIntoView({ behavior: 'smooth'});
-  }
+  };
 
   this.setPicturePrev = () => {
+    if (this.settings.currentID != this.settings.currentIDObserver) {
+      this.settings.currentID = this.settings.currentIDObserver + 1;
+    }
+
     if (this.settings.currentID > 0 ) {
       this.settings.currentID--;
     }
     this.scrollToPicture();
-  }
+  };
 
   this.setPictureNext = () => {
+    if (this.settings.currentID != this.settings.currentIDObserver) {
+      this.settings.currentID = this.settings.currentIDObserver;
+    }
+
     if (this.settings.currentID < this.settings.totalPictures - 1 ) {
       this.settings.currentID++;
     }
     this.scrollToPicture();
-  }
+  };
 
   this.navigateButton = (e) => {
     if (e.currentTarget == this.refs.$navPrev) {
@@ -174,6 +215,11 @@ const Pictures = function () {
   }
 
   this.resize = () => {
+    if (this.refs.observer != undefined) {
+      this.resetObserver();
+      this.setObserver();
+    }
+
     const finalWindowW = (windowW < this.settings.maxWindowWidth) ? windowW : this.settings.maxWindowWidth;
 
     if(finalWindowW == this.settings.maxWindowWidth) {
@@ -213,13 +259,17 @@ const resizeListener = () => {
   windowW = (window.innerWidth || screen.width);
   windowH = (window.innerHeight || screen.height);
 
-  pictures.resize();
+  if(pictures) {
+    pictures.resize();
+  }
 };
 
 
 
 //init
 const init = () => {
+  resizeListener();
+
   pictures = new Pictures();
   pictures.init();
 
