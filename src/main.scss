@@ -210,6 +210,10 @@ body {
     transform-origin: top left;
     will-change: transform;
 
+    .is-inverted & {
+      background-color: white;
+    }
+
     @for $i from 1 to 11 {
       &:nth-child(#{$i}) {
         transition-delay: calc(#{$i}s * var(--d-delay));
