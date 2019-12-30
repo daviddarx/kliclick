@@ -1,5 +1,13 @@
 
 @import 'reset-css/reset.css';
+@import url("https://hello.myfonts.net/count/3ab588");
+
+@font-face {
+  font-family: 'Mont-Book';
+  src: url('webfonts/3AB588_0_0.eot');
+  src: url('webfonts/3AB588_0_0.eot?#iefix') format('embedded-opentype'), url('webfonts/3AB588_0_0.woff2') format('woff2'), url('webfonts/3AB588_0_0.woff') format('woff'), url('webfonts/3AB588_0_0.ttf') format('truetype');
+}
+
 
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
