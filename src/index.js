@@ -106,6 +106,11 @@ const Pictures = function () {
     $navPrev: undefined,
     $navNext: undefined,
     $lightmodeButton: undefined,
+    $paginationCurrent: undefined,
+    $paginationTotal: undefined,
+    timeoutDisplayNextPicture: undefined,
+    timeoutHidePreviousPicture: undefined,
+    pictureToHide: undefined,
   };
 
   this.init = () => {
@@ -120,7 +125,6 @@ const Pictures = function () {
     this.refs.$navPrev.addEventListener('touchstart', this.navigateButton);
     this.refs.$navNext.addEventListener('click', this.navigateButton);
     this.refs.$navNext.addEventListener('touchstart', this.navigateButton);
-
     window.addEventListener('keydown', this.navigateKeyboard, false);
 
     this.refs.$lightmodeButton = document.querySelector('.lightmode-button');
@@ -139,13 +143,15 @@ const Pictures = function () {
 
     this.settings.totalPictures = this.refs.picturesRep.length;
 
+    this.refs.$paginationCurrent = document.querySelector('.pagination__current');
+    this.refs.$paginationTotal = document.querySelector('.pagination__total');
+    this.refs.$paginationTotal.innerHTML = this.settings.totalPictures;
+    this.updatePagination();
+
+
     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
 
     this.changePicture();
-  };
-
-  this.toggleLightmode = () => {
-    document.body.classList.toggle('is-inverted');
   };
 
   this.loadComplete = () => {
@@ -157,6 +163,8 @@ const Pictures = function () {
   };
 
   this.changePicture = () => {
+    this.updatePagination();
+
     this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
     this.refs.$pictures[this.settings.currentID].classList.add('is-active');
 
@@ -225,12 +233,31 @@ const Pictures = function () {
       this.setPicturePrev();
     } else if (key == 40) {
       this.setPictureNext();
+    } else if (key == 66) {
+      this.toggleLightmode();
     }
 
-    if (key == 38 || key == 40) {
+    if (key == 38 || key == 40 | key == 66) {
       e.preventDefault();
     }
   }
+
+  this.updatePagination = () => {
+    let zero = '';
+    let current = this.settings.totalPictures - this.settings.currentID;
+
+    if (this.settings.totalPictures >= 10 && current < 10) {
+      zero = '0';
+    } else if (this.settings.totalPictures >= 100 && current < 100) {
+      zero = '00';
+    }
+
+    this.refs.$paginationCurrent.innerHTML = zero + current;
+  }
+
+  this.toggleLightmode = () => {
+    document.body.classList.toggle('is-inverted');
+  };
 
   this.resize = () => {
     const padding = Math.floor(windowW * this.settings.windowPaddingRatioToW);

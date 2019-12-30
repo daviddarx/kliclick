@@ -8,6 +8,9 @@
   src: url('webfonts/3AB588_0_0.eot?#iefix') format('embedded-opentype'), url('webfonts/3AB588_0_0.woff2') format('woff2'), url('webfonts/3AB588_0_0.woff') format('woff'), url('webfonts/3AB588_0_0.ttf') format('truetype');
 }
 
+@mixin glow {
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
 
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
@@ -42,7 +45,7 @@ body {
     height: 100%;
     background-color: #fff;
     transform: scaleY(0);
-    transform-origin: top left;
+    transform-origin: bottom left;
     transition: transform var(--e-inout) 0.5s;
     will-change: transform;
   }
@@ -52,6 +55,7 @@ body {
 
     &::before {
       transform: scaleY(1);
+      transform-origin: top left;
     }
   }
 }
@@ -90,6 +94,17 @@ body {
   }
 }
 
+.pagination {
+  position: absolute;
+  font-size: 16px;
+  width: 5em;
+  text-align: right;
+  transform: rotate(90deg) translate(calc(-100% - 24px), -125%);
+  transform-origin: top left;
+  //text-align: right;
+  //text-shadow: 0 0 5px white, 0 0 10px white;
+}
+
 .navigation {
   position: fixed;
   z-index: 200;
@@ -98,7 +113,7 @@ body {
 .navigation-button {
   --s-height: 48px;
   --s-width: 24px;
-  --s-spacing: 16px;
+  --s-spacing: 2px;
   --r-arrow: 45deg;
 
   cursor: pointer;
@@ -110,6 +125,7 @@ body {
 
   &::before,
   &::after {
+    @include glow();
     content: "";
     display: block;
     position: absolute;
@@ -144,6 +160,8 @@ body {
   }
 
   &__line {
+    @include glow();
+
     display: block;
     position: absolute;
     width: 1px;
