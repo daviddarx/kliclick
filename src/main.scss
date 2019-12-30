@@ -44,8 +44,8 @@ body {
     width: 100%;
     height: 100%;
     background-color: #fff;
-    transform: scaleY(0);
-    transform-origin: bottom left;
+    transform: scaleX(0);
+    transform-origin: top right;
     transition: transform var(--e-inout) 0.5s;
     will-change: transform;
   }
@@ -54,7 +54,7 @@ body {
     --c-interaction: rgba(0, 0, 0, 0.95);
 
     &::before {
-      transform: scaleY(1);
+      transform: scaleX(1);
       transform-origin: top left;
     }
   }

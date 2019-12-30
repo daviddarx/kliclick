@@ -26,7 +26,7 @@
     </div>
     <div class="pictures">
       <each loop="picture in content.pictures">
-        <div class="picture">
+        <div class="picture" data-bg="!!picture[1]!!">
           <div
             class="picture__mask"
           >
@@ -41,7 +41,7 @@
             <div class="picture__rect"></div>
             <div class="picture__rect"></div>
           </div>
-          <img rel="images/!!picture!!" class="picture__el"></include>
+          <img rel="images/!!picture[0]!!" class="picture__el"></include>
         </div>
       </each>
     </div>

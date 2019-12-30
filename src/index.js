@@ -108,6 +108,7 @@ const Pictures = function () {
     $lightmodeButton: undefined,
     $paginationCurrent: undefined,
     $paginationTotal: undefined,
+    timeoutChangeLightmode: undefined,
     timeoutDisplayNextPicture: undefined,
     timeoutHidePreviousPicture: undefined,
     pictureToHide: undefined,
@@ -167,6 +168,8 @@ const Pictures = function () {
 
     this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
     this.refs.$pictures[this.settings.currentID].classList.add('is-active');
+
+    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
 
     if (this.refs.timeoutDisplayNextPicture != undefined) {
       clearTimeout(this.refs.timeoutDisplayNextPicture);
@@ -256,8 +259,24 @@ const Pictures = function () {
   }
 
   this.toggleLightmode = () => {
+    if (this.refs.timeoutChangeLightmode != undefined) {
+      clearTimeout(this.refs.timeoutChangeLightmode);
+    }
     document.body.classList.toggle('is-inverted');
   };
+
+  this.changeLightmode = (isLight) => {
+    if (this.refs.timeoutChangeLightmode != undefined) {
+      clearTimeout(this.refs.timeoutChangeLightmode);
+    }
+    this.refs.timeoutChangeLightmode = setTimeout( () => {
+      if (isLight == 1) {
+        document.body.classList.add('is-inverted');
+      }else {
+        document.body.classList.remove('is-inverted');
+      }
+    }, 1000);
+  }
 
   this.resize = () => {
     const padding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
