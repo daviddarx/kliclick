@@ -126,6 +126,7 @@ body {
   &::before,
   &::after {
     @include glow();
+
     content: "";
     display: block;
     position: absolute;
@@ -196,7 +197,6 @@ body {
   &__el {
     display: block;
     width: 100%;
-    max-width: 100%;
     transition: transform var(--e-inout) 1.5s;
     transform: scale(1.8);
 
