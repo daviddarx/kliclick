@@ -8,6 +8,14 @@
 
 		<title>daviddarx – pixels</title>
 
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="theme-color" content="#ffffff">
+
 		<link href="/main.scss" rel="stylesheet">
 	</head>
 
@@ -15,12 +23,18 @@
 
     <buttton class="lightmode-button"></buttton>
 
-    <buttton class="navigation-button navigation-button--prev"><span class="navigation-button__line"></span></buttton>
-    <buttton class="navigation-button navigation-button--next"><span class="navigation-button__line"></span></buttton>
-
+    <div class="navigation">
+      <p class="pagination">
+        <span class="pagination__current"></span>
+        /
+        <span class="pagination__total"></span>
+      </p>
+      <buttton class="navigation-button navigation-button--prev"><span class="navigation-button__line"></span></buttton>
+      <buttton class="navigation-button navigation-button--next"><span class="navigation-button__line"></span></buttton>
+    </div>
     <div class="pictures">
       <each loop="picture in content.pictures">
-        <div class="picture">
+        <div class="picture" data-bg="!!picture[1]!!">
           <div
             class="picture__mask"
           >
@@ -35,7 +49,7 @@
             <div class="picture__rect"></div>
             <div class="picture__rect"></div>
           </div>
-          <img rel="images/!!picture!!" class="picture__el"></include>
+          <img rel="images/!!picture[0]!!" class="picture__el"></include>
         </div>
       </each>
     </div>

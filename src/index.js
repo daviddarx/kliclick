@@ -6,16 +6,18 @@ const Picture = function () {
 
   this.settings = {
     id: 0,
-    windowWMax: 0,
-    windowHMax: 0,
+    imgURL: '',
     imgWidth: 0,
     imgHeight: 0,
     width: 0,
-    widthRatioToHeight: 0,
-    widthRatioToWindow: 0.8,
     height: 0,
+    posX: 0,
+    posY: 0,
+    widthRatioToHeight: 0,
     heightRatioToWidth: 0,
-    heightRatioToWindow: 0.9 // augmenter en fonction du ratio, pour ecrans très larges comme macboo?
+    windowPadding: 0,
+    windowWMax: 0,
+    windowHMax: 0,
   };
 
   this.refs = {
@@ -26,14 +28,18 @@ const Picture = function () {
 
   this.isLoaded = false;
 
-  this.init = (picture, id) => {
+  this.init = (picture, id, hd) => {
     this.settings.id = id;
     this.refs.$div = picture;
     this.refs.$img = picture.querySelector('img');
+
+    const splittedURL = this.refs.$img.getAttribute('rel').split('.');
+    this.settings.imgURL = splittedURL[0] + hd + '.' + splittedURL[1];
+    console.log(this.settings.imgURL);
   };
 
   this.load = (loadCompleteCallback) => {
-    this.refs.$img.setAttribute('src', this.refs.$img.getAttribute('rel'));
+    this.refs.$img.setAttribute('src', this.settings.imgURL);
     this.refs.$img.addEventListener('load', this.loadComplete);
     this.refs.loadCompleteCallback = loadCompleteCallback;
   };
@@ -60,46 +66,57 @@ const Picture = function () {
     }, 100);
   };
 
-  this.setWindowSizes = (winW, winH) => {
-    this.settings.windowWMax = winW;
-    this.settings.windowHMax = winH;
-  };
+  this.setWindowPadding = (padding) => {
+    this.settings.windowPadding = padding;
+    this.settings.windowWMax = Math.floor(windowW - 2 * padding);
+    this.settings.windowHMax = Math.floor(windowH - 2 * padding);
+  }
 
   this.resize = () => {
     if (this.isLoaded == true) {
-      this.settings.width = this.settings.windowWMax * this.settings.widthRatioToWindow;
-      this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
+      this.settings.height = this.settings.windowHMax;
+      this.settings.width = this.settings.height *  this.settings.widthRatioToHeight;
+      this.settings.posX = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowWMax - this.settings.width));
+      this.settings.posY = this.settings.windowPadding;
 
-      let maxHeight = this.settings.windowHMax * this.settings.heightRatioToWindow;
-
-      if (this.settings.height > maxHeight) {
-        this.settings.height = maxHeight;
-        this.settings.width = this.settings.height * this.settings.widthRatioToHeight;
+      if (this.settings.width > this.settings.windowWMax) {
+        this.settings.width = this.settings.windowWMax;
+        this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
+        this.settings.posX = this.settings.windowPadding;
+        this.settings.posY = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowHMax - this.settings.height));
       }
 
       this.refs.$div.style.width = this.settings.width + 'px';
       this.refs.$div.style.height = this.settings.height + 'px';
+      this.refs.$div.style.left = this.settings.posX + 'px';
+      this.refs.$div.style.top = this.settings.posY + 'px';
     }
   };
 };
 
 const Pictures = function () {
   this.settings = {
-    maxWindowWidth: 1440,
     loadCurrentID: 0,
     totalPictures: 0,
     currentID: 0,
-    currentIDObserver: 0,
-    observerWindowHRatio: 0.75
+    previousID: undefined,
+    windowPaddingRatioToW: 0.025,
   };
 
   this.refs = {
     $picturesContainer: undefined,
     $pictures: undefined,
     picturesRep: undefined,
+    $nav: undefined,
     $navPrev: undefined,
     $navNext: undefined,
-    observer: undefined
+    $lightmodeButton: undefined,
+    $paginationCurrent: undefined,
+    $paginationTotal: undefined,
+    timeoutChangeLightmode: undefined,
+    timeoutDisplayNextPicture: undefined,
+    timeoutHidePreviousPicture: undefined,
+    pictureToHide: undefined,
   };
 
   this.init = () => {
@@ -107,15 +124,20 @@ const Pictures = function () {
     this.refs.$pictures = document.querySelectorAll('.picture');
     this.refs.picturesRep = [];
 
+    this.refs.$nav = document.querySelector('.navigation');
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
     this.refs.$navNext = document.querySelector('.navigation-button--next');
-
     this.refs.$navPrev.addEventListener('click', this.navigateButton);
     this.refs.$navPrev.addEventListener('touchstart', this.navigateButton);
     this.refs.$navNext.addEventListener('click', this.navigateButton);
     this.refs.$navNext.addEventListener('touchstart', this.navigateButton);
+    window.addEventListener('keydown', this.navigateKeyboard, false);
 
-    window.addEventListener('keydown', this.navigationKeyboard, false);
+    this.refs.$lightmodeButton = document.querySelector('.lightmode-button');
+    this.refs.$lightmodeButton.addEventListener('click', this.toggleLightmode);
+    this.refs.$lightmodeButton.addEventListener('touchstart', this.toggleLightmode);
+
+    const imgHDFormat = (windowW * window.devicePixelRatio > 1600) ? '_hd' : '';
 
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
@@ -123,48 +145,21 @@ const Pictures = function () {
         picture.classList.add('is-even');
       }
       const pictureItem = new Picture();
-            pictureItem.init(picture, i);
+            pictureItem.init(picture, i, imgHDFormat);
       this.refs.picturesRep.push(pictureItem);
     });
 
     this.settings.totalPictures = this.refs.picturesRep.length;
 
+    this.refs.$paginationCurrent = document.querySelector('.pagination__current');
+    this.refs.$paginationTotal = document.querySelector('.pagination__total');
+    this.refs.$paginationTotal.innerHTML = this.settings.totalPictures;
+    this.updatePagination();
+
+
     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
 
-    this.setObserver();
-  };
-
-
-
-  this.setObserver = () => {
-    if(!!window.IntersectionObserver){
-      this.refs.observer = new IntersectionObserver(this.observerListener, {
-        rootMargin: `0px 0px -${ (windowH) * this.settings.observerWindowHRatio }px 0px`
-      });
-
-      this.refs.$pictures.forEach(picture => {
-        picture.classList.add('is-masked');
-        this.refs.observer.observe(picture);
-      });
-    }
-  };
-
-  this.resetObserver = () => {
-    if(!!window.IntersectionObserver && this.refs.observer != undefined){
-      this.refs.$pictures.forEach(picture => {
-        this.refs.observer.unobserve(picture);
-      })
-      this.refs.observer = undefined;
-    }
-  };
-
-  this.observerListener = (entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting == true) {
-        entry.target.classList.add('is-active');
-        this.settings.currentIDObserver = parseInt(entry.target.getAttribute('rel'));
-      }
-    });
+    this.changePicture();
   };
 
   this.loadComplete = () => {
@@ -175,30 +170,62 @@ const Pictures = function () {
     }
   };
 
-  this.scrollToPicture = () => {
-    this.refs.$pictures[this.settings.currentID].scrollIntoView({ behavior: 'smooth'});
+  this.changePicture = () => {
+    this.updatePagination();
+
+    this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
+    this.refs.$pictures[this.settings.currentID].classList.add('is-active');
+
+    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
+
+    if (this.refs.timeoutDisplayNextPicture != undefined) {
+      clearTimeout(this.refs.timeoutDisplayNextPicture);
+    }
+    this.refs.timeoutDisplayNextPicture = setTimeout(this.displayNextPicture, 100);
+
+    if (this.settings.previousID != undefined) {
+      this.refs.$pictures[this.settings.previousID].classList.remove('is-on-top');
+      if (this.refs.timeoutHidePreviousPicture != undefined) {
+        clearTimeout(this.refs.timeoutHidePreviousPicture);
+        if (this.settings.currentID != parseInt(this.refs.pictureToHide.getAttribute("rel"))) { //to avoid overwriting bug if user go next/prev quickly
+          this.deactivePreviousPicture();
+        }
+      }
+      this.refs.pictureToHide = this.refs.$pictures[this.settings.previousID];
+      this.refs.timeoutHidePreviousPicture = setTimeout(this.hidePreviousPicture, 1000);
+    }
+  };
+
+  this.displayNextPicture = () => {
+    this.refs.$pictures[this.settings.currentID].classList.add('is-displayed');
+    this.refs.timeoutDisplayNextPicture = undefined;
+  };
+
+  this.hidePreviousPicture = () => {
+    this.refs.pictureToHide.classList.remove('is-displayed');
+    this.refs.timeoutHidePreviousPicture = setTimeout(this.deactivePreviousPicture, 1700);
+  };
+
+  this.deactivePreviousPicture = () => {
+    this.refs.pictureToHide.classList.remove('is-displayed'); //for direct call to overwrite first animation out step
+    this.refs.pictureToHide.classList.remove('is-active');
+    this.refs.timeoutHidePreviousPicture = undefined;
   };
 
   this.setPicturePrev = () => {
-    if (this.settings.currentID != this.settings.currentIDObserver) {
-      this.settings.currentID = this.settings.currentIDObserver + 1;
-    }
-
     if (this.settings.currentID > 0 ) {
+      this.settings.previousID = this.settings.currentID;
       this.settings.currentID--;
+      this.changePicture();
     }
-    this.scrollToPicture();
   };
 
   this.setPictureNext = () => {
-    if (this.settings.currentID != this.settings.currentIDObserver) {
-      this.settings.currentID = this.settings.currentIDObserver + 1;
-    }
-
     if (this.settings.currentID < this.settings.totalPictures - 1 ) {
+      this.settings.previousID = this.settings.currentID;
       this.settings.currentID++;
+      this.changePicture();
     }
-    this.scrollToPicture();
   };
 
   this.navigateButton = (e) => {
@@ -209,36 +236,66 @@ const Pictures = function () {
     }
   };
 
-  this.navigationKeyboard = (e) => {
+  this.navigateKeyboard = (e) => {
     const key = e.keyCode ? e.keyCode : e.which;
 
     if (key == 38) {
       this.setPicturePrev();
     } else if (key == 40) {
       this.setPictureNext();
+    } else if (key == 66) {
+      this.toggleLightmode();
     }
 
-    if (key == 38 || key == 40) {
+    if (key == 38 || key == 40 | key == 66) {
       e.preventDefault();
     }
   }
 
+  this.updatePagination = () => {
+    let zero = '';
+    let current = this.settings.totalPictures - this.settings.currentID;
+
+    if (this.settings.totalPictures >= 10 && current < 10) {
+      zero = '0';
+    } else if (this.settings.totalPictures >= 100 && current < 100) {
+      zero = '00';
+    }
+
+    this.refs.$paginationCurrent.innerHTML = zero + current;
+  }
+
+  this.toggleLightmode = () => {
+    if (this.refs.timeoutChangeLightmode != undefined) {
+      clearTimeout(this.refs.timeoutChangeLightmode);
+    }
+    document.body.classList.toggle('is-inverted');
+  };
+
+  this.changeLightmode = (isLight) => {
+    if (this.refs.timeoutChangeLightmode != undefined) {
+      clearTimeout(this.refs.timeoutChangeLightmode);
+    }
+    this.refs.timeoutChangeLightmode = setTimeout( () => {
+      if (isLight == 1) {
+        document.body.classList.add('is-inverted');
+      }else {
+        document.body.classList.remove('is-inverted');
+      }
+    }, 1000);
+  }
+
   this.resize = () => {
-    if (this.refs.observer != undefined) {
-      this.resetObserver();
-      this.setObserver();
-    }
+    const padding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
 
-    const finalWindowW = (windowW < this.settings.maxWindowWidth) ? windowW : this.settings.maxWindowWidth;
+    this.refs.$nav.style.right = padding + 'px';
+    this.refs.$nav.style.bottom = padding + 'px';
 
-    if(finalWindowW == this.settings.maxWindowWidth) {
-      this.refs.$picturesContainer.style.width = finalWindowW + 'px';
-    }else{
-      this.refs.$picturesContainer.style.width = 'auto';
-    }
+    this.refs.$lightmodeButton.style.right = padding + 'px';
+    this.refs.$lightmodeButton.style.top = padding + 'px';
 
     this.refs.picturesRep.forEach((pictureItem) => {
-      pictureItem.setWindowSizes(finalWindowW, windowH);
+      pictureItem.setWindowPadding(padding);
       pictureItem.resize();
     });
   };
@@ -247,16 +304,6 @@ const Pictures = function () {
 let pictures = undefined;
 
 
-
-//lightmode
-const $lightmodeButton = document.querySelector('.lightmode-button');
-
-const toggleLightmode = () => {
-  document.body.classList.toggle('is-inverted');
-};
-
-$lightmodeButton.addEventListener('click', toggleLightmode);
-$lightmodeButton.addEventListener('touchstart', toggleLightmode);
 
 
 
