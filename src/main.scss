@@ -199,6 +199,7 @@ body {
     width: 100%;
     transition: transform var(--e-inout) 1.5s;
     transform: scale(1.8);
+    will-change: transform;
 
     #{$root}.is-displayed & {
       transform: scale(1);

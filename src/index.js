@@ -6,6 +6,7 @@ const Picture = function () {
 
   this.settings = {
     id: 0,
+    imgURL: '',
     imgWidth: 0,
     imgHeight: 0,
     width: 0,
@@ -27,14 +28,18 @@ const Picture = function () {
 
   this.isLoaded = false;
 
-  this.init = (picture, id) => {
+  this.init = (picture, id, hd) => {
     this.settings.id = id;
     this.refs.$div = picture;
     this.refs.$img = picture.querySelector('img');
+
+    const splittedURL = this.refs.$img.getAttribute('rel').split('.');
+    this.settings.imgURL = splittedURL[0] + hd + '.' + splittedURL[1];
+    console.log(this.settings.imgURL);
   };
 
   this.load = (loadCompleteCallback) => {
-    this.refs.$img.setAttribute('src', this.refs.$img.getAttribute('rel'));
+    this.refs.$img.setAttribute('src', this.settings.imgURL);
     this.refs.$img.addEventListener('load', this.loadComplete);
     this.refs.loadCompleteCallback = loadCompleteCallback;
   };
@@ -132,13 +137,15 @@ const Pictures = function () {
     this.refs.$lightmodeButton.addEventListener('click', this.toggleLightmode);
     this.refs.$lightmodeButton.addEventListener('touchstart', this.toggleLightmode);
 
+    const imgHDFormat = (windowW * window.devicePixelRatio > 1600) ? '_hd' : '';
+
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
       if (i%2 == 0) {
         picture.classList.add('is-even');
       }
       const pictureItem = new Picture();
-            pictureItem.init(picture, i);
+            pictureItem.init(picture, i, imgHDFormat);
       this.refs.picturesRep.push(pictureItem);
     });
 
