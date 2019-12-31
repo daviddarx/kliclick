@@ -182,6 +182,15 @@ const Pictures = function () {
   this.changePicture = () => {
     this.updatePagination();
 
+    this.refs.$navPrev.classList.remove('is-disabled');
+    this.refs.$navNext.classList.remove('is-disabled');
+
+    if (this.settings.currentID == 0) {
+      this.refs.$navPrev.classList.add('is-disabled');
+    } else if (this.settings.currentID == this.settings.totalPictures - 1) {
+      this.refs.$navNext.classList.add('is-disabled');
+    }
+
     this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
     this.refs.$pictures[this.settings.currentID].classList.add('is-active');
 

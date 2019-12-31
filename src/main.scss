@@ -25,7 +25,7 @@
 html {
   --c-background: rgba(0, 0, 0, 1);
   --c-interaction: #fff;
-  --d-c-interaction: 0.2s;
+  --d-interaction: 0.2s;
   --e-out: cubic-bezier(0.165, 0.84, 0.44, 1); //quart
   --e-inout: cubic-bezier(0.77, 0, 0.175, 1); //quart
 }
@@ -74,7 +74,7 @@ body {
   height: var(--s-button);
   border-radius: 100%;
   border: 1px solid var(--c-interaction);
-  transition: border-color ease-out var(--d-c-interaction);
+  transition: border-color ease-out var(--d-interaction);
 
   &::before {
     content: "";
@@ -85,7 +85,7 @@ body {
     width: calc(var(--s-button) * 0.5);
     height: var(--s-button);
     background-color: var(--c-interaction);
-    transition: width var(--e-out) 0.2s, background-color ease-out var(--d-c-interaction);
+    transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
   }
 
   &:hover {
@@ -123,6 +123,7 @@ body {
   width: var(--s-width);
   height: var(--s-height);
   margin-top: var(--s-spacing);
+  transition: opacity ease-out var(--d-interaction);
 
   &::before,
   &::after {
@@ -138,7 +139,7 @@ body {
     background-color: var(--c-interaction);
     transform-origin: top right;
     transform: rotate(0deg);
-    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-c-interaction);
+    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
   }
 
   &::after {
@@ -170,7 +171,12 @@ body {
     height: 100%;
     left: 50%;
     background-color: var(--c-interaction);
-    transition: background-color ease-out var(--d-c-interaction);
+    transition: background-color ease-out var(--d-interaction);
+  }
+
+  &.is-disabled {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
