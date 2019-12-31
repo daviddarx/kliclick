@@ -35,7 +35,6 @@ const Picture = function () {
 
     const splittedURL = this.refs.$img.getAttribute('rel').split('.');
     this.settings.imgURL = splittedURL[0] + hd + '.' + splittedURL[1];
-    console.log(this.settings.imgURL);
   };
 
   this.load = (loadCompleteCallback) => {
