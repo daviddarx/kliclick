@@ -34,6 +34,7 @@ body {
   background-color: var(--c-background);
   font-family: Mont-Book, Arial, Helvetica, sans-serif;
   color: var(--c-interaction);
+  overflow: hidden;
 
   &::before {
     content: "";

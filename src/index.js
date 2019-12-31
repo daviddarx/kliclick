@@ -115,6 +115,7 @@ const Pictures = function () {
     timeoutChangeLightmode: undefined,
     timeoutDisplayNextPicture: undefined,
     timeoutHidePreviousPicture: undefined,
+    timeoutWheelDebounce: undefined,
     pictureToHide: undefined,
   };
 
@@ -159,6 +160,15 @@ const Pictures = function () {
     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
 
     this.changePicture();
+
+    window.addEventListener('wheel', (e) => {
+      if (this.refs.timeoutWheelDebounce) {
+        clearTimeout(this.refs.timeoutWheelDebounce);
+      }
+      this.refs.timeoutWheelDebounce = setTimeout(()=> {
+        this.navigateWheel(e.deltaY);
+      }, 100);
+    });
   };
 
   this.loadComplete = () => {
@@ -250,6 +260,17 @@ const Pictures = function () {
       e.preventDefault();
     }
   }
+
+  this.navigateWheel = (delta) => {
+    if (delta > 0) {
+      this.setPictureNext();
+    } else {
+      this.setPicturePrev();
+    }
+
+    return false;
+  };
+
 
   this.updatePagination = () => {
     let zero = '';
