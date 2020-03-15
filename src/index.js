@@ -184,7 +184,7 @@ const App = function () {
 
   this.setThumbs = () => {
     this.refs.thumbsApp = new PIXI.Application({
-      backgroundColor:0xff0000,
+      backgroundColor:0xffffff,
       antialias: true,
       transparent: false,
       resolution: 1,
