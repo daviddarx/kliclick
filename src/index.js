@@ -3,6 +3,7 @@ const Picture = function () {
 
   this.settings = {
     id: 0,
+    thumbURL: '',
     imgURL: '',
     imgWidth: 0,
     imgHeight: 0,
@@ -30,8 +31,9 @@ const Picture = function () {
     this.refs.$div = picture;
     this.refs.$img = picture.querySelector('img');
 
-    const splittedURL = this.refs.$img.getAttribute('rel').split('.');
-    this.settings.imgURL = splittedURL[0] + hd + '.' + splittedURL[1];
+    const splittedURL = this.refs.$img.getAttribute('rel').split('/');
+    this.settings.imgURL = splittedURL[0] + '/' + hd + splittedURL[1];
+    this.settings.thumbURL = splittedURL[0] + '/' +  '_thumbs/' + splittedURL[1];
   };
 
   this.load = (loadCompleteCallback) => {
@@ -139,12 +141,12 @@ const App = function () {
     this.refs.$lightmodeButton.addEventListener('click', this.toggleLightmode);
     this.refs.$lightmodeButton.addEventListener('touchstart', this.toggleLightmode);
 
-    const imgHDFormat = (windowW * window.devicePixelRatio > 1600) ? '_hd' : '';
+    const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? '_hd/' : '';
 
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
       const pictureItem = new Picture();
-            pictureItem.init(picture, i, imgHDFormat);
+            pictureItem.init(picture, i, imgHDFolder);
       this.refs.picturesRep.push(pictureItem);
     });
 
@@ -155,9 +157,7 @@ const App = function () {
     this.refs.$paginationTotal.innerHTML = this.settings.totalPictures;
     this.updatePagination();
 
-
-    this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
-
+    // this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
     // this.changePicture();
     this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
 
@@ -169,7 +169,14 @@ const App = function () {
         this.navigateWheel(e.deltaY);
       }, 100);
     });
+
+    this.setNavigation();
   };
+
+  this.setNavigation = () => {
+    console.log("set navigation");
+    console.log(this.refs.picturesRep[0]);
+  }
 
   this.loadComplete = () => {
     this.settings.loadCurrentID ++;
