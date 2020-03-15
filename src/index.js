@@ -1,3 +1,5 @@
+import * as PIXI from 'pixi.js'
+
 //pictures
 const Picture = function () {
 
@@ -100,6 +102,7 @@ const Picture = function () {
 const App = function () {
   this.settings = {
     loadCurrentID: 0,
+    loadThumbsCurrentID: 0,
     totalPictures: 0,
     currentID: 0,
     previousID: undefined,
@@ -110,6 +113,9 @@ const App = function () {
     $picturesContainer: undefined,
     $pictures: undefined,
     picturesRep: undefined,
+    $thumbsContainer: undefined,
+    thumbsApp: undefined,
+    thumbsRep: undefined,
     $nav: undefined,
     $navPrev: undefined,
     $navNext: undefined,
@@ -127,6 +133,9 @@ const App = function () {
     this.refs.$picturesContainer = document.querySelector('.pictures');
     this.refs.$pictures = document.querySelectorAll('.picture');
     this.refs.picturesRep = [];
+
+    this.refs.$thumbsContainer = document.querySelector('.thumbs');
+    this.refs.thumbsRep = [];
 
     this.refs.$nav = document.querySelector('.navigation');
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
@@ -159,7 +168,7 @@ const App = function () {
 
     // this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
     // this.changePicture();
-    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
+    // this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
 
     window.addEventListener('wheel', (e) => {
       if (this.refs.timeoutWheelDebounce) {
@@ -170,12 +179,48 @@ const App = function () {
       }, 100);
     });
 
-    this.setNavigation();
+    this.setThumbs();
   };
 
-  this.setNavigation = () => {
-    console.log("set navigation");
-    console.log(this.refs.picturesRep[0]);
+  this.setThumbs = () => {
+    this.refs.thumbsApp = new PIXI.Application({
+      backgroundColor:0xff0000,
+      antialias: true,
+      transparent: false,
+      resolution: 1,
+
+    });
+    this.refs.thumbsApp.renderer.autoResize = true;
+    this.refs.$thumbsContainer.appendChild(this.refs.thumbsApp.view);
+
+    this.loadThumb();
+  }
+
+  this.loadThumb = () => {
+    PIXI.Loader.shared.add(this.refs.picturesRep[this.settings.loadThumbsCurrentID].settings.thumbURL).load(() => {
+      this.createThumb();
+    });
+  }
+
+  this.createThumb = () => {
+    const thumb = new PIXI.Sprite(PIXI.Loader.shared.resources[this.refs.picturesRep[this.settings.loadThumbsCurrentID].settings.thumbURL].texture);
+    this.refs.thumbsApp.stage.addChild(thumb);
+    this.refs.thumbsRep.push(thumb);
+    this.positionThumb(this.settings.loadThumbsCurrentID);
+
+    if (this.settings.loadThumbsCurrentID < this.settings.totalPictures-1) {
+      this.settings.loadThumbsCurrentID++;
+      this.loadThumb();
+    }
+  }
+
+  this.positionThumb = (id) => {
+    this.refs.thumbsRep[id].x = Math.random() * windowW;
+    this.refs.thumbsRep[id].y = Math.random() * windowH;
+  }
+
+  this.resizeThumbs = () => {
+    this.refs.thumbsApp.renderer.resize(windowW, windowH);
   }
 
   this.loadComplete = () => {
@@ -287,7 +332,6 @@ const App = function () {
     return false;
   };
 
-
   this.updatePagination = () => {
     let zero = '';
     let current = this.settings.totalPictures - this.settings.currentID;
@@ -334,6 +378,8 @@ const App = function () {
       pictureItem.setWindowPadding(padding);
       pictureItem.resize();
     });
+
+    this.resizeThumbs();
   };
 };
 
