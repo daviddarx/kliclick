@@ -61,6 +61,19 @@ body {
   }
 }
 
+.logo {
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+
+  &__img {
+    width: auto;
+    height: 30vh;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .lightmode-button {
   --s-button: 24px;
 
