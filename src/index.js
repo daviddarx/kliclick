@@ -90,7 +90,12 @@ const Picture = function () {
   };
 };
 
-const Pictures = function () {
+
+
+
+
+//app
+const App = function () {
   this.settings = {
     loadCurrentID: 0,
     totalPictures: 0,
@@ -328,7 +333,7 @@ const Pictures = function () {
   };
 };
 
-let pictures = undefined;
+let app = undefined;
 
 
 
@@ -342,8 +347,8 @@ const resizeListener = () => {
   windowW = (window.innerWidth || screen.width);
   windowH = (window.innerHeight || screen.height);
 
-  if(pictures) {
-    pictures.resize();
+  if(app) {
+    app.resize();
   }
 };
 
@@ -353,8 +358,8 @@ const resizeListener = () => {
 const init = () => {
   resizeListener();
 
-  pictures = new Pictures();
-  pictures.init();
+  app = new App();
+  app.init();
 
   window.addEventListener('resize', resizeListener);
   resizeListener();
