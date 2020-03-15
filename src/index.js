@@ -159,7 +159,8 @@ const Pictures = function () {
 
     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
 
-    this.changePicture();
+    // this.changePicture();
+    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
 
     window.addEventListener('wheel', (e) => {
       if (this.refs.timeoutWheelDebounce) {
@@ -194,7 +195,7 @@ const Pictures = function () {
     this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
     this.refs.$pictures[this.settings.currentID].classList.add('is-active');
 
-    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
+    this.changeLightmode(true);
 
     if (this.refs.timeoutDisplayNextPicture != undefined) {
       clearTimeout(this.refs.timeoutDisplayNextPicture);
