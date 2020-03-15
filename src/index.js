@@ -143,9 +143,6 @@ const App = function () {
 
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
-      if (i%2 == 0) {
-        picture.classList.add('is-even');
-      }
       const pictureItem = new Picture();
             pictureItem.init(picture, i, imgHDFormat);
       this.refs.picturesRep.push(pictureItem);
