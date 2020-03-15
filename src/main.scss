@@ -257,16 +257,6 @@ body {
       }
     }
 
-    #{$root}.is-even & {
-      transform-origin: top right;
-
-      @for $i from 1 to 11 {
-        &:nth-child(#{$i}) {
-          transition-delay: calc(#{11-$i}s * var(--d-delay));
-        }
-      }
-    }
-
     #{$root}.is-displayed & {
       transform: scaleX(0);
     }
