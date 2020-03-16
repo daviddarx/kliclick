@@ -1,11 +1,11 @@
-import * as PIXI from 'pixi.js'
+import smoothscroll from 'smoothscroll-polyfill';
+smoothscroll.polyfill();
 
 //pictures
 const Picture = function () {
 
   this.settings = {
     id: 0,
-    thumbURL: '',
     imgURL: '',
     imgWidth: 0,
     imgHeight: 0,
@@ -33,9 +33,8 @@ const Picture = function () {
     this.refs.$div = picture;
     this.refs.$img = picture.querySelector('img');
 
-    const splittedURL = this.refs.$img.getAttribute('rel').split('/');
-    this.settings.imgURL = splittedURL[0] + '/' + hd + splittedURL[1];
-    this.settings.thumbURL = splittedURL[0] + '/' +  '_thumbs/' + splittedURL[1];
+    const splittedURL = this.refs.$img.getAttribute('rel').split('.');
+    this.settings.imgURL = splittedURL[0] + hd + '.' + splittedURL[1];
   };
 
   this.load = (loadCompleteCallback) => {
@@ -94,15 +93,9 @@ const Picture = function () {
   };
 };
 
-
-
-
-
-//app
-const App = function () {
+const Pictures = function () {
   this.settings = {
     loadCurrentID: 0,
-    loadThumbsCurrentID: 0,
     totalPictures: 0,
     currentID: 0,
     previousID: undefined,
@@ -113,9 +106,6 @@ const App = function () {
     $picturesContainer: undefined,
     $pictures: undefined,
     picturesRep: undefined,
-    $thumbsContainer: undefined,
-    thumbsApp: undefined,
-    thumbsRep: undefined,
     $nav: undefined,
     $navPrev: undefined,
     $navNext: undefined,
@@ -134,9 +124,6 @@ const App = function () {
     this.refs.$pictures = document.querySelectorAll('.picture');
     this.refs.picturesRep = [];
 
-    this.refs.$thumbsContainer = document.querySelector('.thumbs');
-    this.refs.thumbsRep = [];
-
     this.refs.$nav = document.querySelector('.navigation');
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
     this.refs.$navNext = document.querySelector('.navigation-button--next');
@@ -150,12 +137,15 @@ const App = function () {
     this.refs.$lightmodeButton.addEventListener('click', this.toggleLightmode);
     this.refs.$lightmodeButton.addEventListener('touchstart', this.toggleLightmode);
 
-    const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? '_hd/' : '';
+    const imgHDFormat = (windowW * window.devicePixelRatio > 1600) ? '_hd' : '';
 
     this.refs.$pictures.forEach((picture, i) => {
       picture.setAttribute('rel', i);
+      if (i%2 == 0) {
+        picture.classList.add('is-even');
+      }
       const pictureItem = new Picture();
-            pictureItem.init(picture, i, imgHDFolder);
+            pictureItem.init(picture, i, imgHDFormat);
       this.refs.picturesRep.push(pictureItem);
     });
 
@@ -166,9 +156,10 @@ const App = function () {
     this.refs.$paginationTotal.innerHTML = this.settings.totalPictures;
     this.updatePagination();
 
-    // this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
-    // this.changePicture();
-    // this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
+
+    this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
+
+    this.changePicture();
 
     window.addEventListener('wheel', (e) => {
       if (this.refs.timeoutWheelDebounce) {
@@ -178,50 +169,7 @@ const App = function () {
         this.navigateWheel(e.deltaY);
       }, 100);
     });
-
-    this.setThumbs();
   };
-
-  this.setThumbs = () => {
-    this.refs.thumbsApp = new PIXI.Application({
-      backgroundColor:0xffffff,
-      antialias: true,
-      transparent: false,
-      resolution: 1,
-
-    });
-    this.refs.thumbsApp.renderer.autoResize = true;
-    this.refs.$thumbsContainer.appendChild(this.refs.thumbsApp.view);
-
-    this.loadThumb();
-  }
-
-  this.loadThumb = () => {
-    PIXI.Loader.shared.add(this.refs.picturesRep[this.settings.loadThumbsCurrentID].settings.thumbURL).load(() => {
-      this.createThumb();
-    });
-  }
-
-  this.createThumb = () => {
-    const thumb = new PIXI.Sprite(PIXI.Loader.shared.resources[this.refs.picturesRep[this.settings.loadThumbsCurrentID].settings.thumbURL].texture);
-    this.refs.thumbsApp.stage.addChild(thumb);
-    this.refs.thumbsRep.push(thumb);
-    this.positionThumb(this.settings.loadThumbsCurrentID);
-
-    if (this.settings.loadThumbsCurrentID < this.settings.totalPictures-1) {
-      this.settings.loadThumbsCurrentID++;
-      this.loadThumb();
-    }
-  }
-
-  this.positionThumb = (id) => {
-    this.refs.thumbsRep[id].x = Math.random() * windowW;
-    this.refs.thumbsRep[id].y = Math.random() * windowH;
-  }
-
-  this.resizeThumbs = () => {
-    this.refs.thumbsApp.renderer.resize(windowW, windowH);
-  }
 
   this.loadComplete = () => {
     this.settings.loadCurrentID ++;
@@ -246,7 +194,7 @@ const App = function () {
     this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
     this.refs.$pictures[this.settings.currentID].classList.add('is-active');
 
-    this.changeLightmode(true);
+    this.changeLightmode(parseInt(this.refs.$pictures[this.settings.currentID].getAttribute('data-bg')));
 
     if (this.refs.timeoutDisplayNextPicture != undefined) {
       clearTimeout(this.refs.timeoutDisplayNextPicture);
@@ -332,6 +280,7 @@ const App = function () {
     return false;
   };
 
+
   this.updatePagination = () => {
     let zero = '';
     let current = this.settings.totalPictures - this.settings.currentID;
@@ -378,12 +327,10 @@ const App = function () {
       pictureItem.setWindowPadding(padding);
       pictureItem.resize();
     });
-
-    this.resizeThumbs();
   };
 };
 
-let app = undefined;
+let pictures = undefined;
 
 
 
@@ -397,8 +344,8 @@ const resizeListener = () => {
   windowW = (window.innerWidth || screen.width);
   windowH = (window.innerHeight || screen.height);
 
-  if(app) {
-    app.resize();
+  if(pictures) {
+    pictures.resize();
   }
 };
 
@@ -408,8 +355,8 @@ const resizeListener = () => {
 const init = () => {
   resizeListener();
 
-  app = new App();
-  app.init();
+  pictures = new Pictures();
+  pictures.init();
 
   window.addEventListener('resize', resizeListener);
   resizeListener();
