@@ -36,28 +36,8 @@ body {
   color: var(--c-interaction);
   overflow: hidden;
 
-  &::before {
-    content: "";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-    transform: scaleX(0);
-    transform-origin: top right;
-    transition: transform var(--e-inout) 0.5s;
-    will-change: transform;
-  }
-
   &.is-inverted {
     --c-interaction: rgba(0, 0, 0, 0.95);
-
-    &::before {
-      transform: scaleX(1);
-      transform-origin: top left;
-    }
   }
 }
 
