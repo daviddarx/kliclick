@@ -99,7 +99,7 @@ body {
   width: var(--s-button);
   height: var(--s-button);
   border-radius: 100%;
-  border: 2px solid var(--c-interaction);
+  border: 1px solid var(--c-interaction);
   transition: border-color ease-out var(--d-interaction);
 
   &::before {
@@ -123,10 +123,10 @@ body {
 
 .pagination {
   position: absolute;
-  font-size: 24px;
+  font-size: 16px;
   width: 5em;
   text-align: right;
-  transform: rotate(90deg) translate(calc(-100% - 32px), -90%);
+  transform: rotate(90deg) translate(calc(-100% - 24px), -125%);
   transform-origin: top left;
   //text-align: right;
   //text-shadow: 0 0 5px white, 0 0 10px white;
@@ -140,7 +140,7 @@ body {
 .navigation-button {
   --s-height: 48px;
   --s-width: 24px;
-  --s-spacing: 4px;
+  --s-spacing: 2px;
   --r-arrow: 45deg;
 
   cursor: pointer;
@@ -159,7 +159,7 @@ body {
     display: block;
     position: absolute;
     width: 50%;
-    height: 2px;
+    height: 1px;
     top: 0;
     left: 0;
     background-color: var(--c-interaction);
@@ -171,7 +171,6 @@ body {
   &::after {
     left: 50%;
     transform-origin: bottom left;
-    margin-left: 1px;
   }
 
   &:hover {
@@ -194,7 +193,7 @@ body {
 
     display: block;
     position: absolute;
-    width: 2px;
+    width: 1px;
     height: 100%;
     left: 50%;
     background-color: var(--c-interaction);
