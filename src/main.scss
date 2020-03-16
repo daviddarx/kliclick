@@ -61,32 +61,6 @@ body {
   }
 }
 
-<<<<<<< HEAD
-.logo {
-  position: fixed;
-  z-index: 2000;
-  top: 50%;
-  left: 50%;
-
-  &__img {
-    width: auto;
-    height: 30vh;
-    transform: translate(-50%, -50%);
-  }
-}
-
-.thumbs {
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  left: 0;
-  right: 0;
-  left: 0;
-  background-color: white;
-}
-
-=======
->>>>>>> parent of a875ad5... feat(logo) adds logo
 .lightmode-button {
   --s-button: 24px;
 
