@@ -108,6 +108,15 @@ const Thumb = function () {
   this.imgURL = '';
 
   this.settings = {
+    x: 0,
+    y: 0,
+    spriteX: 0,
+    spriteY: 0,
+    scale: 0,
+    width: 0,
+    height: 0,
+    widthInit: 0,
+    heightInit: 0
   };
 
   this.refs = {
@@ -125,15 +134,23 @@ const Thumb = function () {
   };
 
   this.load = (loadCompleteCallback) => {
-    PIXI.Loader.shared.add(this.imgURL).load(() => {
+    if (!PIXI.Loader.shared.resources[this.imgURL]) {
+      PIXI.Loader.shared.add(this.imgURL).load(() => {
+        this.createSprite();
+        loadCompleteCallback();
+      });
+    } else {
       this.createSprite();
       loadCompleteCallback();
-    });
+    }
   };
 
   this.createSprite = () => {
     this.refs.imageSprite = new PIXI.Sprite(PIXI.Loader.shared.resources[this.imgURL].texture);
+    this.refs.imageSprite.anchor.set(0.5);
     this.refs.parent.addChild(this.refs.imageSprite);
+    this.settings.widthInit = this.refs.imageSprite.width;
+    this.settings.heightInit = this.refs.imageSprite.height;
   };
 
   this.setPosition = (x, y) => {
@@ -141,13 +158,33 @@ const Thumb = function () {
     this.settings.y = y;
   }
 
-  this.place = () => {
-    if (this.refs.imageSprite) {
-      this.refs.imageSprite.x = this.settings.x;
-      this.refs.imageSprite.y = this.settings.y;
-      this.refs.imageSprite.scale.x = 0.5;
-      this.refs.imageSprite.scale.y = 0.5;
+  this.setSize = (width, height) => {
+    this.settings.width = width;
+    this.settings.scale = width / this.settings.widthInit;
+    this.settings.height = this.settings.scale * this.settings.heightInit;
+
+    if (this.settings.height > height) {
+      this.settings.height = height;
+      this.settings.scale = height / this.settings.heightInit;
+      this.settings.width = this.settings.scale * this.settings.widthInit;
     }
+
+    if (this.settings.scale > 1) {
+      this.settings.scale = 1;
+    }
+    this.settings.spriteX = width * 0.5;
+    this.settings.spriteY = height * 0.5;
+  }
+
+  this.setAnimation = () => {
+    this.refs.imageSprite.rotation += 0.01;
+  }
+
+  this.place = () => {
+    this.refs.imageSprite.x = this.settings.x + this.settings.spriteX;
+    this.refs.imageSprite.y = this.settings.y + this.settings.spriteY;
+    this.refs.imageSprite.scale.x = this.settings.scale;
+    this.refs.imageSprite.scale.y = this.settings.scale;
   };
 }
 
@@ -198,11 +235,13 @@ const App = function () {
       transparent: false,
       resolution: 1,
     });
+    this.refs.app.ticker.add(this.animateThumbs);
     this.refs.app.renderer.autoResize = true;
     this.refs.$app.appendChild(this.refs.app.view);
 
     this.refs.picturesRep = [];
     this.refs.thumbsRep = [];
+    this.refs.thumbsRepToRender = [];
     this.refs.thumbsPositions = [];
 
     this.refs.$nav = document.querySelector('.navigation');
@@ -252,7 +291,11 @@ const App = function () {
   };
 
   this.thumbsLoadCompleteListener = () => {
-    this.refs.thumbsRep[this.settings.loadThumbsCurrentID].place();
+    const item = this.refs.thumbsRep[this.settings.loadThumbsCurrentID];
+    this.placeThumb(item);
+    this.refs.thumbsRepToRender.push(item);
+
+
 
     if (this.settings.loadThumbsCurrentID < this.settings.totalPictures-1) {
       this.settings.loadThumbsCurrentID++;
@@ -261,14 +304,21 @@ const App = function () {
   };
 
   this.calculateThumbsPosition = () => {
-    this.settings.stepsXNumber = Math.ceil(Math.sqrt(this.refs.thumbsRep.length));
-    this.settings.stepsYNumber = Math.ceil(Math.sqrt(this.refs.thumbsRep.length));
+    const totalThumbs = this.refs.thumbsRep.length;
+
+    this.settings.stepsXNumber = Math.ceil(Math.sqrt(totalThumbs));
+    this.settings.stepsYNumber = Math.ceil(Math.sqrt(totalThumbs));
+
+    if(windowW/windowH > 1.25){
+      this.settings.stepsXNumber++;
+      this.settings.stepsYNumber = Math.ceil(totalThumbs / this.settings.stepsXNumber);
+    } else if(windowW/windowH < 0.8){
+      this.settings.stepsXNumber--;
+      this.settings.stepsYNumber = Math.ceil(totalThumbs / this.settings.stepsXNumber);
+    }
+
     this.settings.stepXDist = windowW / this.settings.stepsXNumber;
     this.settings.stepYDist = windowH / this.settings.stepsYNumber;
-    console.log(this.settings.stepsXNumber);
-    //changer les steps en fonction du ration de l'écran pour égaliser
-    //test avec nombres impaires
-    //randomiser array
   }
 
   this.placeThumb = (thumbItem) => {
@@ -278,6 +328,17 @@ const App = function () {
       thumbItem.id * this.settings.stepXDist - lineID * windowW,
       Math.floor(thumbItem.id/this.settings.stepsXNumber) * this.settings.stepYDist
     );
+    thumbItem.setSize(
+      this.settings.stepXDist,
+      this.settings.stepYDist
+    );
+    thumbItem.place();
+  }
+
+  this.animateThumbs = () => {
+    this.refs.thumbsRepToRender.forEach(item => {
+      item.setAnimation();
+    });
   }
 
   // this.loadComplete = () => {
@@ -442,7 +503,7 @@ const App = function () {
 
     this.calculateThumbsPosition();
 
-    this.refs.thumbsRep.forEach(item => {
+    this.refs.thumbsRepToRender.forEach(item => {
       this.placeThumb(item);
     });
   };
