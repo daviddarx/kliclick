@@ -112,12 +112,17 @@ const Thumb = function () {
     y: 0,
     spriteX: 0,
     spriteY: 0,
+    spriteXRandom: 0,
+    spriteYRandom: 0,
     scale: 0,
     width: 0,
     height: 0,
     widthInit: 0,
     heightInit: 0,
-    availableScale: 0.9
+    availableScale: 0.9,
+    randomScaleMin: 0.2,
+    randomScaleMax: 2,
+    randomPositionMax: 0.1
   };
 
   this.refs = {
@@ -157,6 +162,12 @@ const Thumb = function () {
   this.setPosition = (x, y) => {
     this.settings.x = x;
     this.settings.y = y;
+
+    const randomPositionMaxX = windowW * this.settings.randomPositionMax;
+    const randomPositionMaxY = windowH * this.settings.randomPositionMax;
+
+    this.settings.spriteXRandom = Math.random() * randomPositionMaxX * 2 - randomPositionMaxX;
+    this.settings.spriteYRandom = Math.random() * randomPositionMaxY * 2 - randomPositionMaxY;
   }
 
   this.setSize = (width, height) => {
@@ -173,6 +184,8 @@ const Thumb = function () {
       this.settings.width = this.settings.scale * this.settings.widthInit;
     }
 
+    this.settings.scale = this.settings.randomScaleMin + this.settings.scale * Math.random(this.settings.randomScaleMax);
+
     if (this.settings.scale > 1) {
       this.settings.scale = 1;
     }
@@ -185,8 +198,8 @@ const Thumb = function () {
   // }
 
   this.place = () => {
-    this.refs.imageSprite.x = this.settings.x + this.settings.spriteX;
-    this.refs.imageSprite.y = this.settings.y + this.settings.spriteY;
+    this.refs.imageSprite.x = this.settings.x + this.settings.spriteX + this.settings.spriteXRandom;
+    this.refs.imageSprite.y = this.settings.y + this.settings.spriteY + this.settings.spriteYRandom;
     this.refs.imageSprite.scale.x = this.settings.scale;
     this.refs.imageSprite.scale.y = this.settings.scale;
   };
