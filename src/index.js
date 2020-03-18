@@ -116,7 +116,8 @@ const Thumb = function () {
     width: 0,
     height: 0,
     widthInit: 0,
-    heightInit: 0
+    heightInit: 0,
+    availableScale: 0.9
   };
 
   this.refs = {
@@ -159,13 +160,16 @@ const Thumb = function () {
   }
 
   this.setSize = (width, height) => {
-    this.settings.width = width;
-    this.settings.scale = width / this.settings.widthInit;
+    const availableWidth = width * this.settings.availableScale;
+    const availableBHeight = height * this.settings.availableScale;
+
+    this.settings.width = availableWidth;
+    this.settings.scale = availableWidth / this.settings.widthInit;
     this.settings.height = this.settings.scale * this.settings.heightInit;
 
-    if (this.settings.height > height) {
-      this.settings.height = height;
-      this.settings.scale = height / this.settings.heightInit;
+    if (this.settings.height > availableBHeight) {
+      this.settings.height = availableBHeight;
+      this.settings.scale = availableBHeight / this.settings.heightInit;
       this.settings.width = this.settings.scale * this.settings.widthInit;
     }
 
@@ -176,9 +180,9 @@ const Thumb = function () {
     this.settings.spriteY = height * 0.5;
   }
 
-  this.setAnimation = () => {
-    this.refs.imageSprite.rotation += 0.01;
-  }
+  // this.setAnimation = () => {
+  //   this.refs.imageSprite.rotation += 0.01;
+  // }
 
   this.place = () => {
     this.refs.imageSprite.x = this.settings.x + this.settings.spriteX;
@@ -335,11 +339,11 @@ const App = function () {
     thumbItem.place();
   }
 
-  this.animateThumbs = () => {
-    this.refs.thumbsRepToRender.forEach(item => {
-      item.setAnimation();
-    });
-  }
+  // this.animateThumbs = () => {
+  //   this.refs.thumbsRepToRender.forEach(item => {
+  //     item.setAnimation();
+  //   });
+  // }
 
   // this.loadComplete = () => {
   //   this.settings.loadCurrentID ++;
