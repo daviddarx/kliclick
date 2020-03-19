@@ -24,7 +24,7 @@
 
 html {
   --c-background: rgba(0, 0, 0, 1);
-  --c-interaction: #fff;
+  --c-interaction: rgba(0, 0, 0, 1);
   --d-interaction: 0.2s;
   --e-out: cubic-bezier(0.165, 0.84, 0.44, 1); //quart
   --e-inout: cubic-bezier(0.77, 0, 0.175, 1); //quart
@@ -37,7 +37,7 @@ body {
   overflow: hidden;
 
   &.is-inverted {
-    --c-interaction: rgba(0, 0, 0, 0.95);
+    --c-interaction: rgba(255, 255, 255, 1);
   }
 }
 
