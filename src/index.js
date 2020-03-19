@@ -187,9 +187,8 @@ const Thumb = function () {
     this.refs.mask = new PIXI.Graphics();
     this.refs.mask.beginFill(this.refs.app.masksColor);
     this.refs.mask.drawRect(this.refs.image.width * -1, this.refs.image.height * -1, this.refs.image.width, this.refs.image.height);
-    this.refs.mask.position.set(this.refs.image.width * 0.5,  this.refs.image.height * 0.5);
-
     this.refs.mask.endFill();
+    this.refs.mask.position.set(this.refs.image.width * 0.5,  this.refs.image.height * 0.5);
     this.refs.container.addChild(this.refs.mask);
 
     this.refs.mask.tween = gsap.to(this.refs.mask.scale, {
