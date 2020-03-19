@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js'
+import gsap from "gsap/all"
 import * as content from '../content/pictures.json'
 
 delete content.default;
@@ -124,7 +125,11 @@ const Thumb = function () {
     randomScaleMax: 2,
     randomPositionMax: 0.1,
     scaleHover: 1,
-    scaleMax: 0.9
+    scaleMax: 0.9,
+    scaleAnimationInDuration: 0.5,
+    scaleAnimationInEase: "expo.out",
+    scaleAnimationOutDuration: 0.25,
+    scaleAnimationOutEase: "expo.inOut"
   };
 
   this.refs = {
@@ -198,14 +203,25 @@ const Thumb = function () {
 
   this.mouseOver = () => {
     this.refs.imageSprite.zIndex = 1000;
-    this.refs.imageSprite.scale.x = this.settings.scaleHover;
-    this.refs.imageSprite.scale.y = this.settings.scaleHover;
+    this.refs.imageSprite.tween = gsap.to(this.refs.imageSprite.scale, {
+      duration: this.settings.scaleAnimationInDuration,
+      x: this.settings.scaleHover,
+      y: this.settings.scaleHover,
+      ease: this.settings.scaleAnimationInEase
+    });
   };
 
   this.mouseOut = () => {
     this.refs.imageSprite.zIndex = this.id;
-    this.refs.imageSprite.scale.x = this.settings.scale;
-    this.refs.imageSprite.scale.y = this.settings.scale;
+    if (this.refs.imageSprite.tween) {
+      this.refs.imageSprite.tween.kill();
+    }
+    this.refs.imageSprite.tween = gsap.to(this.refs.imageSprite.scale, {
+      duration: this.settings.scaleAnimationOutDuration,
+      x: this.settings.scale,
+      y: this.settings.scale,
+      ease: this.settings.scaleAnimationOutEase
+    });
   };
 
   this.setPosition = (x, y) => {
