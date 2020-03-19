@@ -122,13 +122,16 @@ const Thumb = function () {
     availableScale: 0.9,
     randomScaleMin: 0.2,
     randomScaleMax: 2,
-    randomPositionMax: 0.1
+    randomPositionMax: 0.1,
+    scaleHover: 1,
+    scaleMax: 0.9
   };
 
   this.refs = {
     parent: undefined,
     imageSprite: undefined,
-    loadCompleteCallback: undefined
+    loadCompleteCallback: undefined,
+    positionOnClick: undefined
   };
 
   this.isLoaded = false;
@@ -154,9 +157,55 @@ const Thumb = function () {
   this.createSprite = () => {
     this.refs.imageSprite = new PIXI.Sprite(PIXI.Loader.shared.resources[this.imgURL].texture);
     this.refs.imageSprite.anchor.set(0.5);
+    this.refs.imageSprite.interactive = true;
+    this.refs.imageSprite.buttonMode = true;
+    // this.refs.imageSprite.hitArea = new PIXI.Rectangle(0, 0, 20, 20);
+    this.refs.imageSprite.zIndex = this.id;
+    this.refs.imageSprite.on('pointerdown', this.pointerDown);
+    this.refs.imageSprite.on('pointerup', this.pointerUp);
+    this.refs.imageSprite.on('pointerover', this.mouseOver);
+    this.refs.imageSprite.on('pointerout', this.mouseOut);
+    this.refs.imageSprite.on('pointerupoutside', this.mouseOut);
+    this.refs.imageSprite.on('pointermove', this.move);
     this.refs.parent.addChild(this.refs.imageSprite);
     this.settings.widthInit = this.refs.imageSprite.width;
     this.settings.heightInit = this.refs.imageSprite.height;
+  };
+
+  this.pointerDown = (event) => {
+    this.refs.positionOnClick = {
+      x: this.refs.imageSprite.x,
+      y: this.refs.imageSprite.y
+    };
+    this.refs.imageSprite.data = event.data;
+    this.refs.imageSprite.dragging = true;
+  };
+
+  this.pointerUp = () => {
+    this.refs.imageSprite.dragging = false;
+    if (this.refs.imageSprite.x == this.refs.positionOnClick.x && this.refs.imageSprite.y == this.refs.positionOnClick.y) {
+      console.log(this.id);
+    }
+  };
+
+  this.move = () => {
+    if (this.refs.imageSprite.dragging) {
+      const newPosition = this.refs.imageSprite.data.getLocalPosition(this.refs.imageSprite.parent);
+      this.refs.imageSprite.x = newPosition.x;
+      this.refs.imageSprite.y = newPosition.y;
+    }
+  };
+
+  this.mouseOver = () => {
+    this.refs.imageSprite.zIndex = 1000;
+    this.refs.imageSprite.scale.x = this.settings.scaleHover;
+    this.refs.imageSprite.scale.y = this.settings.scaleHover;
+  };
+
+  this.mouseOut = () => {
+    this.refs.imageSprite.zIndex = this.id;
+    this.refs.imageSprite.scale.x = this.settings.scale;
+    this.refs.imageSprite.scale.y = this.settings.scale;
   };
 
   this.setPosition = (x, y) => {
@@ -186,8 +235,8 @@ const Thumb = function () {
 
     this.settings.scale = this.settings.randomScaleMin + this.settings.scale * Math.random(this.settings.randomScaleMax);
 
-    if (this.settings.scale > 1) {
-      this.settings.scale = 1;
+    if (this.settings.scale > this.settings.scaleMax) {
+      this.settings.scale = this.settings.scaleMax;
     }
     this.settings.spriteX = width * 0.5;
     this.settings.spriteY = height * 0.5;
@@ -224,6 +273,7 @@ const App = function () {
   this.refs = {
     $app: undefined,
     app: undefined,
+    thumbsContainer: undefined,
     thumbsRep: undefined,
     thumbsPositions: undefined,
     stepsXNumber: undefined,
@@ -257,6 +307,10 @@ const App = function () {
     this.refs.$app.appendChild(this.refs.app.view);
 
     this.refs.picturesRep = [];
+
+    this.refs.thumbsContainer = new PIXI.Container();
+    this.refs.thumbsContainer.sortableChildren = true;
+    this.refs.app.stage.addChild(this.refs.thumbsContainer);
     this.refs.thumbsRep = [];
     this.refs.thumbsRepToRender = [];
     this.refs.thumbsPositions = [];
@@ -294,7 +348,11 @@ const App = function () {
 
     contentArray.forEach((item, i) => {
       const thumbItem = new Thumb();
-            thumbItem.init(this.refs.app.stage, i, this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0]);
+            thumbItem.init(
+              this.refs.thumbsContainer,
+              i,
+              this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0]
+            );
       this.refs.thumbsRep.push(thumbItem);
 
       // const pictureItem = new Picture();
