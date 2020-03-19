@@ -129,19 +129,25 @@ const Thumb = function () {
     scaleAnimationInDuration: 0.5,
     scaleAnimationInEase: "expo.out",
     scaleAnimationOutDuration: 0.25,
-    scaleAnimationOutEase: "expo.inOut"
+    scaleAnimationOutEase: "expo.inOut",
+    maskAnimationOutDuration: 0.5,
+    maskAnimationOutEase: "expo.inOut"
   };
 
   this.refs = {
+    app: undefined,
     parent: undefined,
-    imageSprite: undefined,
+    container: undefined,
+    image: undefined,
+    mask: undefined,
     loadCompleteCallback: undefined,
     positionOnClick: undefined
   };
 
   this.isLoaded = false;
 
-  this.init = (parent, id, imgURL) => {
+  this.init = (app, parent, id, imgURL) => {
+    this.refs.app = app;
     this.refs.parent = parent;
     this.id = id;
     this.imgURL = imgURL;
@@ -150,60 +156,76 @@ const Thumb = function () {
   this.load = (loadCompleteCallback) => {
     if (!PIXI.Loader.shared.resources[this.imgURL]) {
       PIXI.Loader.shared.add(this.imgURL).load(() => {
-        this.createSprite();
+        this.createImage();
         loadCompleteCallback();
       });
     } else {
-      this.createSprite();
+      this.createImage();
       loadCompleteCallback();
     }
   };
 
-  this.createSprite = () => {
-    this.refs.imageSprite = new PIXI.Sprite(PIXI.Loader.shared.resources[this.imgURL].texture);
-    this.refs.imageSprite.anchor.set(0.5);
-    this.refs.imageSprite.interactive = true;
-    this.refs.imageSprite.buttonMode = true;
-    // this.refs.imageSprite.hitArea = new PIXI.Rectangle(0, 0, 20, 20);
-    this.refs.imageSprite.zIndex = this.id;
-    this.refs.imageSprite.on('pointerdown', this.pointerDown);
-    this.refs.imageSprite.on('pointerup', this.pointerUp);
-    this.refs.imageSprite.on('pointerover', this.mouseOver);
-    this.refs.imageSprite.on('pointerout', this.mouseOut);
-    this.refs.imageSprite.on('pointerupoutside', this.mouseOut);
-    this.refs.imageSprite.on('pointermove', this.move);
-    this.refs.parent.addChild(this.refs.imageSprite);
-    this.settings.widthInit = this.refs.imageSprite.width;
-    this.settings.heightInit = this.refs.imageSprite.height;
+  this.createImage = () => {
+    this.refs.container = new PIXI.Container();
+    this.refs.parent.addChild(this.refs.container);
+
+    this.refs.image = new PIXI.Sprite(PIXI.Loader.shared.resources[this.imgURL].texture);
+    this.refs.image.anchor.set(0.5);
+    this.refs.image.interactive = true;
+    this.refs.image.buttonMode = true;
+    this.refs.image.zIndex = this.id;
+    this.refs.image.on('pointerdown', this.pointerDown);
+    this.refs.image.on('pointerup', this.pointerUp);
+    this.refs.image.on('pointerover', this.mouseOver);
+    this.refs.image.on('pointerout', this.mouseOut);
+    this.refs.image.on('pointerupoutside', this.mouseOut);
+    this.refs.image.on('pointermove', this.move);
+    this.refs.container.addChild(this.refs.image);
+    this.settings.widthInit = this.refs.image.width;
+    this.settings.heightInit = this.refs.image.height;
+
+    this.refs.mask = new PIXI.Graphics();
+    this.refs.mask.beginFill(this.refs.app.masksColor);
+    this.refs.mask.drawRect(this.refs.image.width * -1, this.refs.image.height * -1, this.refs.image.width, this.refs.image.height);
+    this.refs.mask.position.set(this.refs.image.width * 0.5,  this.refs.image.height * 0.5);
+
+    this.refs.mask.endFill();
+    this.refs.container.addChild(this.refs.mask);
+
+    this.refs.mask.tween = gsap.to(this.refs.mask.scale, {
+      duration: this.settings.maskAnimationOutDuration,
+      x: 0,
+      ease: this.settings.maskAnimationOutEase
+    });
   };
 
   this.pointerDown = (event) => {
     this.refs.positionOnClick = {
-      x: this.refs.imageSprite.x,
-      y: this.refs.imageSprite.y
+      x: this.refs.container.x,
+      y: this.refs.container.y
     };
-    this.refs.imageSprite.data = event.data;
-    this.refs.imageSprite.dragging = true;
+    this.refs.container.data = event.data;
+    this.refs.container.dragging = true;
   };
 
   this.pointerUp = () => {
-    this.refs.imageSprite.dragging = false;
-    if (this.refs.imageSprite.x == this.refs.positionOnClick.x && this.refs.imageSprite.y == this.refs.positionOnClick.y) {
+    this.refs.container.dragging = false;
+    if (this.refs.container.x == this.refs.positionOnClick.x && this.refs.container.y == this.refs.positionOnClick.y) {
       console.log(this.id);
     }
   };
 
   this.move = () => {
-    if (this.refs.imageSprite.dragging) {
-      const newPosition = this.refs.imageSprite.data.getLocalPosition(this.refs.imageSprite.parent);
-      this.refs.imageSprite.x = newPosition.x;
-      this.refs.imageSprite.y = newPosition.y;
+    if (this.refs.container.dragging) {
+      const newPosition = this.refs.container.data.getLocalPosition(this.refs.container.parent);
+      this.refs.container.x = newPosition.x;
+      this.refs.container.y = newPosition.y;
     }
   };
 
   this.mouseOver = () => {
-    this.refs.imageSprite.zIndex = 1000;
-    this.refs.imageSprite.tween = gsap.to(this.refs.imageSprite.scale, {
+    this.refs.container.zIndex = 1000;
+    this.refs.container.tween = gsap.to(this.refs.container.scale, {
       duration: this.settings.scaleAnimationInDuration,
       x: this.settings.scaleHover,
       y: this.settings.scaleHover,
@@ -212,11 +234,11 @@ const Thumb = function () {
   };
 
   this.mouseOut = () => {
-    this.refs.imageSprite.zIndex = this.id;
-    if (this.refs.imageSprite.tween) {
-      this.refs.imageSprite.tween.kill();
+    this.refs.container.zIndex = this.id;
+    if (this.refs.container.tween) {
+      this.refs.container.tween.kill();
     }
-    this.refs.imageSprite.tween = gsap.to(this.refs.imageSprite.scale, {
+    this.refs.container.tween = gsap.to(this.refs.container.scale, {
       duration: this.settings.scaleAnimationOutDuration,
       x: this.settings.scale,
       y: this.settings.scale,
@@ -258,15 +280,12 @@ const Thumb = function () {
     this.settings.spriteY = height * 0.5;
   }
 
-  // this.setAnimation = () => {
-  //   this.refs.imageSprite.rotation += 0.01;
-  // }
-
   this.place = () => {
-    this.refs.imageSprite.x = this.settings.x + this.settings.spriteX + this.settings.spriteXRandom;
-    this.refs.imageSprite.y = this.settings.y + this.settings.spriteY + this.settings.spriteYRandom;
-    this.refs.imageSprite.scale.x = this.settings.scale;
-    this.refs.imageSprite.scale.y = this.settings.scale;
+    this.refs.container.x = this.settings.x + this.settings.spriteX + this.settings.spriteXRandom;
+    this.refs.container.y = this.settings.y + this.settings.spriteY + this.settings.spriteYRandom;
+
+    this.refs.container.scale.x = this.settings.scale;
+    this.refs.container.scale.y = this.settings.scale;
   };
 }
 
@@ -283,7 +302,9 @@ const App = function () {
     previousID: undefined,
     windowPaddingRatioToW: 0.025,
     imagesFolderURL: '/images/',
-    thumbsFolderURL: '_thumbs/'
+    thumbsFolderURL: '_thumbs/',
+    masksColorLight: 0xffffff,
+    masksColorDark: 0x000000
   };
 
   this.refs = {
@@ -318,7 +339,7 @@ const App = function () {
       transparent: false,
       resolution: 1,
     });
-    this.refs.app.ticker.add(this.animateThumbs);
+    this.refs.app.masksColor = this.settings.masksColorLight;
     this.refs.app.renderer.autoResize = true;
     this.refs.$app.appendChild(this.refs.app.view);
 
@@ -365,6 +386,7 @@ const App = function () {
     contentArray.forEach((item, i) => {
       const thumbItem = new Thumb();
             thumbItem.init(
+              this.refs.app,
               this.refs.thumbsContainer,
               i,
               this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0]
@@ -377,8 +399,6 @@ const App = function () {
     });
 
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
-
-    this.toggleLightmode();
   };
 
   this.thumbsLoadCompleteListener = () => {
@@ -426,11 +446,6 @@ const App = function () {
     thumbItem.place();
   }
 
-  // this.animateThumbs = () => {
-  //   this.refs.thumbsRepToRender.forEach(item => {
-  //     item.setAnimation();
-  //   });
-  // }
 
   // this.loadComplete = () => {
   //   this.settings.loadCurrentID ++;
