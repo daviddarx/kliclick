@@ -241,10 +241,12 @@ const App = function () {
     windowPaddingRatioToW: 0.025,
     imagesFolderURL: '/images/',
     thumbsFolderURL: '_thumbs/',
+    areThumbsDisplayed: true,
   };
 
   this.refs = {
     $thumbsContainer: undefined,
+    $thumbsButton: undefined,
     thumbsRep: undefined,
     thumbsRepToRender: undefined,
     stepsXNumber: undefined,
@@ -296,6 +298,9 @@ const App = function () {
     // });
 
     this.refs.$thumbsContainer = document.querySelector('.thumbs');
+    this.refs.$thumbsButton = document.querySelector('.thumbs-button');
+    this.refs.$thumbsButton.addEventListener('click', this.toggleThumbs);
+    this.refs.$thumbsButton.addEventListener('touchstart', this.toggleThumbs);
 
     const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? '_hd/' : '';
 
@@ -349,7 +354,7 @@ const App = function () {
 
     this.settings.stepXDist = windowW / this.settings.stepsXNumber;
     this.settings.stepYDist = windowH / this.settings.stepsYNumber;
-  }
+  };
 
   this.placeThumb = (thumbItem) => {
     const lineID = Math.floor(thumbItem.id/this.settings.stepsXNumber);
@@ -363,7 +368,17 @@ const App = function () {
       this.settings.stepYDist
     );
     thumbItem.place();
-  }
+  };
+
+  this.toggleThumbs = () => {
+    if (this.settings.areThumbsDisplayed == true) {
+      document.body.classList.remove('thumbs-displayed');
+      this.settings.areThumbsDisplayed = false;
+    } else {
+      document.body.classList.add('thumbs-displayed');
+      this.settings.areThumbsDisplayed = true;
+    }
+  };
 
 
   // this.loadComplete = () => {
@@ -516,8 +531,11 @@ const App = function () {
     this.refs.$nav.style.right = padding + 'px';
     this.refs.$nav.style.bottom = padding + 'px';
 
-    this.refs.$lightmodeButton.style.right = padding + 'px';
+    this.refs.$lightmodeButton.style.left = padding + 'px';
     this.refs.$lightmodeButton.style.top = padding + 'px';
+
+    this.refs.$thumbsButton.style.right = padding + 'px';
+    this.refs.$thumbsButton.style.top = padding + 'px';
 
     // this.refs.picturesRep.forEach((pictureItem) => {
     //   pictureItem.setWindowPadding(padding);
@@ -562,6 +580,8 @@ const init = () => {
 
   window.addEventListener('resize', resizeListener);
   resizeListener();
+
+  document.body.classList.add('is-computed');
 };
 
 init();
