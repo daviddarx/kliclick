@@ -344,7 +344,10 @@ body {
 
   &:hover {
     transform: scale(var(--s-scale-hover));
-    z-index: 6000;
+
+    .thumbs-displayed & {
+      z-index: 6000;
+    }
   }
 
   &__img {
