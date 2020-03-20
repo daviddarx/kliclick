@@ -111,10 +111,10 @@ const Thumb = function () {
   this.settings = {
     x: 0,
     y: 0,
-    spriteX: 0,
-    spriteY: 0,
-    spriteXRandom: 0,
-    spriteYRandom: 0,
+    posX: 0,
+    posY: 0,
+    posXRandom: 0,
+    posYRandom: 0,
     scale: 0,
     width: 0,
     height: 0,
@@ -124,125 +124,54 @@ const Thumb = function () {
     randomScaleMin: 0.2,
     randomScaleMax: 2,
     randomPositionMax: 0.1,
-    scaleHover: 1,
-    scaleMax: 0.9,
-    scaleAnimationInDuration: 0.5,
-    scaleAnimationInEase: "expo.out",
-    scaleAnimationOutDuration: 0.25,
-    scaleAnimationOutEase: "expo.inOut",
-    maskAnimationOutDuration: 0.5,
-    maskAnimationOutEase: "expo.inOut"
+    scaleMax: 0.8,
+    loadCompleteTimeoutDuration: 100
   };
 
   this.refs = {
-    app: undefined,
-    parent: undefined,
-    container: undefined,
-    image: undefined,
-    mask: undefined,
+    $parent: undefined,
+    $container: undefined,
+    $image: undefined,
     loadCompleteCallback: undefined,
-    positionOnClick: undefined
   };
 
   this.isLoaded = false;
 
-  this.init = (app, parent, id, imgURL) => {
-    this.refs.app = app;
-    this.refs.parent = parent;
+  this.init = (parent, id, imgURL) => {
+    this.refs.$parent = parent;
     this.id = id;
     this.imgURL = imgURL;
+
+    this.refs.$container = document.createElement('div');
+    this.refs.$container.classList.add('thumb');
+    this.refs.$parent.appendChild(this.refs.$container);
   };
 
   this.load = (loadCompleteCallback) => {
-    if (!PIXI.Loader.shared.resources[this.imgURL]) {
-      PIXI.Loader.shared.add(this.imgURL).load(() => {
-        this.createImage();
-        loadCompleteCallback();
-      });
-    } else {
-      this.createImage();
-      loadCompleteCallback();
-    }
+    this.refs.loadCompleteCallback = loadCompleteCallback;
+    this.createImage();
   };
 
   this.createImage = () => {
-    this.refs.container = new PIXI.Container();
-    this.refs.parent.addChild(this.refs.container);
+    this.refs.$image = document.createElement('img');
+    this.refs.$image.setAttribute('src',  this.imgURL);
+    this.refs.$image.classList.add('thumb__img');
+    this.refs.$image.addEventListener('load', this.imageLoadComplete);
+    this.refs.$container.appendChild(this.refs.$image);
 
-    this.refs.image = new PIXI.Sprite(PIXI.Loader.shared.resources[this.imgURL].texture);
-    this.refs.image.anchor.set(0.5);
-    this.refs.image.interactive = true;
-    this.refs.image.buttonMode = true;
-    this.refs.image.zIndex = this.id;
-    this.refs.image.on('pointerdown', this.pointerDown);
-    this.refs.image.on('pointerup', this.pointerUp);
-    this.refs.image.on('pointerover', this.mouseOver);
-    this.refs.image.on('pointerout', this.mouseOut);
-    this.refs.image.on('pointerupoutside', this.mouseOut);
-    this.refs.image.on('pointermove', this.move);
-    this.refs.container.addChild(this.refs.image);
-    this.settings.widthInit = this.refs.image.width;
-    this.settings.heightInit = this.refs.image.height;
-
-    this.refs.mask = new PIXI.Graphics();
-    this.refs.mask.beginFill(this.refs.app.masksColor);
-    this.refs.mask.drawRect(this.refs.image.width * -1, this.refs.image.height * -1, this.refs.image.width, this.refs.image.height);
-    this.refs.mask.endFill();
-    this.refs.mask.position.set(this.refs.image.width * 0.5,  this.refs.image.height * 0.5);
-    this.refs.container.addChild(this.refs.mask);
-
-    this.refs.mask.tween = gsap.to(this.refs.mask.scale, {
-      duration: this.settings.maskAnimationOutDuration,
-      x: 0,
-      ease: this.settings.maskAnimationOutEase
-    });
+    this.refs.$container.addEventListener('click', this.click);
+    this.refs.$container.addEventListener('touchstart', this.click);
   };
 
-  this.pointerDown = (event) => {
-    this.refs.positionOnClick = {
-      x: this.refs.container.x,
-      y: this.refs.container.y
-    };
-    this.refs.container.data = event.data;
-    this.refs.container.dragging = true;
+  this.imageLoadComplete = () => {
+    this.settings.widthInit = this.refs.$image.width;
+    this.settings.heightInit = this.refs.$image.height;
+
+    setTimeout(this.refs.loadCompleteCallback, this.settings.loadCompleteTimeoutDuration);
   };
 
-  this.pointerUp = () => {
-    this.refs.container.dragging = false;
-    if (this.refs.container.x == this.refs.positionOnClick.x && this.refs.container.y == this.refs.positionOnClick.y) {
-      console.log(this.id);
-    }
-  };
-
-  this.move = () => {
-    if (this.refs.container.dragging) {
-      const newPosition = this.refs.container.data.getLocalPosition(this.refs.container.parent);
-      this.refs.container.x = newPosition.x;
-      this.refs.container.y = newPosition.y;
-    }
-  };
-
-  this.mouseOver = () => {
-    this.refs.container.zIndex = 1000;
-    this.refs.container.tween = gsap.to(this.refs.container.scale, {
-      duration: this.settings.scaleAnimationInDuration,
-      x: this.settings.scaleHover,
-      y: this.settings.scaleHover,
-      ease: this.settings.scaleAnimationInEase
-    });
-  };
-
-  this.mouseOut = () => {
-    this.refs.container.zIndex = this.id;
-    if (this.refs.container.tween) {
-      this.refs.container.tween.kill();
-    }
-    this.refs.container.tween = gsap.to(this.refs.container.scale, {
-      duration: this.settings.scaleAnimationOutDuration,
-      x: this.settings.scale,
-      y: this.settings.scale,
-      ease: this.settings.scaleAnimationOutEase
-    });
+  this.click = () => {
+    console.log(this.id);
   };
 
   this.setPosition = (x, y) => {
@@ -252,8 +181,17 @@ const Thumb = function () {
     const randomPositionMaxX = windowW * this.settings.randomPositionMax;
     const randomPositionMaxY = windowH * this.settings.randomPositionMax;
 
-    this.settings.spriteXRandom = Math.random() * randomPositionMaxX * 2 - randomPositionMaxX;
-    this.settings.spriteYRandom = Math.random() * randomPositionMaxY * 2 - randomPositionMaxY;
+    if (this.settings.x != 0 ) {
+      this.settings.posXRandom = Math.random() * randomPositionMaxX * 2 - randomPositionMaxX;
+    } else {
+      this.settings.posXRandom = Math.random() * randomPositionMaxX;
+    }
+
+    if (this.settings.y != 0 ) {
+      this.settings.posYRandom = Math.random() * randomPositionMaxY * 2 - randomPositionMaxY;
+    } else {
+      this.settings.posYRandom = Math.random() * randomPositionMaxY;
+    }
   }
 
   this.setSize = (width, height) => {
@@ -275,16 +213,17 @@ const Thumb = function () {
     if (this.settings.scale > this.settings.scaleMax) {
       this.settings.scale = this.settings.scaleMax;
     }
-    this.settings.spriteX = width * 0.5;
-    this.settings.spriteY = height * 0.5;
+    this.refs.$container.style.setProperty('--s-scale', this.settings.scale);
   }
 
   this.place = () => {
-    this.refs.container.x = this.settings.x + this.settings.spriteX + this.settings.spriteXRandom;
-    this.refs.container.y = this.settings.y + this.settings.spriteY + this.settings.spriteYRandom;
+    this.refs.$container.style.left = this.settings.x + this.settings.posX + this.settings.posXRandom + 'px';
+    this.refs.$container.style.top = this.settings.y + this.settings.posY + this.settings.posYRandom + 'px';
 
-    this.refs.container.scale.x = this.settings.scale;
-    this.refs.container.scale.y = this.settings.scale;
+    if (this.isLoaded == false) {
+      this.refs.$container.classList.add('loaded');
+      this.isLoaded = true;
+    }
   };
 }
 
@@ -302,16 +241,12 @@ const App = function () {
     windowPaddingRatioToW: 0.025,
     imagesFolderURL: '/images/',
     thumbsFolderURL: '_thumbs/',
-    masksColorLight: 0xffffff,
-    masksColorDark: 0x000000
   };
 
   this.refs = {
-    $app: undefined,
-    app: undefined,
-    thumbsContainer: undefined,
+    $thumbsContainer: undefined,
     thumbsRep: undefined,
-    thumbsPositions: undefined,
+    thumbsRepToRender: undefined,
     stepsXNumber: undefined,
     stepsYNumber: undefined,
     stepXDist: undefined,
@@ -331,25 +266,6 @@ const App = function () {
   };
 
   this.init = () => {
-    this.refs.$app = document.querySelector('.app');
-    this.refs.app = new PIXI.Application({
-      antialias: true,
-      transparent: true,
-      resolution: 1,
-    });
-    this.refs.app.masksColor = this.settings.masksColorLight;
-    this.refs.app.renderer.autoResize = true;
-    this.refs.$app.appendChild(this.refs.app.view);
-
-    this.refs.picturesRep = [];
-
-    this.refs.thumbsContainer = new PIXI.Container();
-    this.refs.thumbsContainer.sortableChildren = true;
-    this.refs.app.stage.addChild(this.refs.thumbsContainer);
-    this.refs.thumbsRep = [];
-    this.refs.thumbsRepToRender = [];
-    this.refs.thumbsPositions = [];
-
     this.refs.$nav = document.querySelector('.navigation');
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
     this.refs.$navNext = document.querySelector('.navigation-button--next');
@@ -379,22 +295,27 @@ const App = function () {
     //   }, 100);
     // });
 
+    this.refs.$thumbsContainer = document.querySelector('.thumbs');
+
     const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? '_hd/' : '';
+
+    this.refs.picturesRep = [];
+    this.refs.thumbsRep = [];
+    this.refs.thumbsRepToRender = [];
 
     contentArray.forEach((item, i) => {
       const thumbItem = new Thumb();
             thumbItem.init(
-              this.refs.app,
-              this.refs.thumbsContainer,
+              this.refs.$thumbsContainer,
               i,
               this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0]
             );
       this.refs.thumbsRep.push(thumbItem);
+    });
 
-      // const pictureItem = new Picture();
+    // const pictureItem = new Picture();
       //       pictureItem.init(picture, i, imgHDFolder);
       // this.refs.picturesRep.push(pictureItem);
-    });
 
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
   };
@@ -597,8 +518,6 @@ const App = function () {
 
     this.refs.$lightmodeButton.style.right = padding + 'px';
     this.refs.$lightmodeButton.style.top = padding + 'px';
-
-    this.refs.app.renderer.resize(windowW, windowH);
 
     // this.refs.picturesRep.forEach((pictureItem) => {
     //   pictureItem.setWindowPadding(padding);

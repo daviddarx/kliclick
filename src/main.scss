@@ -31,7 +31,6 @@ html {
 }
 
 body {
-  background-color: var(--c-background);
   font-family: Mont-Book, Arial, Helvetica, sans-serif;
   color: var(--c-interaction);
   overflow: hidden;
@@ -52,6 +51,7 @@ body {
   }
 
   &.is-inverted {
+    --c-background: rgba(0, 0, 0, 1);
     --c-interaction: rgba(255, 255, 255, 1);
 
     &::before {
@@ -73,15 +73,6 @@ body {
     height: 30vh;
     transform: translate(-50%, -50%);
   }
-}
-
-.app {
-  position: fixed;
-  z-index: 0;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 
 .lightmode-button {
@@ -201,5 +192,54 @@ body {
   &.is-disabled {
     opacity: 0;
     pointer-events: none;
+  }
+}
+
+.thumbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.thumb {
+  --s-scale: 0;
+  --s-scale-hover: 1;
+
+  cursor: pointer;
+  position: absolute;
+  display: inline-block;
+  visibility: hidden;
+  transform: scale(var(--s-scale));
+  transition: transform var(--e-out) 0.35s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+    background-color: var(--c-background);
+    transform-origin: top right;
+    transition: transform var(--e-inout) 0.75s;
+  }
+
+  &.loaded {
+    visibility: visible;
+
+    &::after {
+      transform: scaleX(0);
+    }
+  }
+
+  &:hover {
+    transform: scale(var(--s-scale-hover));
+    z-index: 1000;
+  }
+
+  &__img {
+    display: block;
   }
 }
