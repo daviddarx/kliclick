@@ -125,7 +125,6 @@ const Thumb = function () {
     randomScaleMax: 2,
     randomPositionMax: 0.1,
     scaleMax: 0.8,
-    loadCompleteTimeoutDuration: 100
   };
 
   this.refs = {
@@ -167,7 +166,7 @@ const Thumb = function () {
     this.settings.widthInit = this.refs.$image.width;
     this.settings.heightInit = this.refs.$image.height;
 
-    setTimeout(this.refs.loadCompleteCallback, this.settings.loadCompleteTimeoutDuration);
+    this.refs.loadCompleteCallback();
   };
 
   this.click = () => {
