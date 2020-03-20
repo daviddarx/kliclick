@@ -131,15 +131,17 @@ const Thumb = function () {
     $parent: undefined,
     $container: undefined,
     $image: undefined,
+    clickCallback: undefined,
     loadCompleteCallback: undefined,
   };
 
   this.isLoaded = false;
 
-  this.init = (parent, id, imgURL) => {
+  this.init = (parent, id, imgURL, clickCallback) => {
     this.refs.$parent = parent;
     this.id = id;
     this.imgURL = imgURL;
+    this.refs.clickCallback = clickCallback;
 
     this.refs.$container = document.createElement('div');
     this.refs.$container.classList.add('thumb');
@@ -170,7 +172,7 @@ const Thumb = function () {
   };
 
   this.click = () => {
-    console.log(this.id);
+    this.refs.clickCallback(this.id);
   };
 
   this.setPosition = (x, y) => {
@@ -312,7 +314,8 @@ const App = function () {
             thumbItem.init(
               this.refs.$thumbsContainer,
               i,
-              this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0]
+              this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0],
+              this.thumbsClickListener
             );
       this.refs.thumbsRep.push(thumbItem);
     });
@@ -329,12 +332,14 @@ const App = function () {
     this.placeThumb(item);
     this.refs.thumbsRepToRender.push(item);
 
-
-
     if (this.settings.loadThumbsCurrentID < this.settings.totalPictures-1) {
       this.settings.loadThumbsCurrentID++;
       this.refs.thumbsRep[this.settings.loadThumbsCurrentID].load(this.thumbsLoadCompleteListener);
     }
+  };
+
+  this.thumbsClickListener = (id) => {
+    this.toggleThumbs();
   };
 
   this.calculateThumbsPosition = () => {
