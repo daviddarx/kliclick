@@ -333,9 +333,8 @@ const App = function () {
   this.init = () => {
     this.refs.$app = document.querySelector('.app');
     this.refs.app = new PIXI.Application({
-      backgroundColor:0xffffff,
       antialias: true,
-      transparent: false,
+      transparent: true,
       resolution: 1,
     });
     this.refs.app.masksColor = this.settings.masksColorLight;
