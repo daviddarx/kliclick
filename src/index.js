@@ -5,99 +5,119 @@ import * as content from '../content/pictures.json'
 delete content.default;
 const contentArray = Object.values(content);
 
-//pictures
-// const Picture = function () {
+// pictures
+const Picture = function () {
+  this.id = 0;
+  this.imgURL = '';
+  this.isLoaded = false;
 
-//   this.settings = {
-//     id: 0,
-//     thumbURL: '',
-//     imgURL: '',
-//     imgWidth: 0,
-//     imgHeight: 0,
-//     width: 0,
-//     height: 0,
-//     posX: 0,
-//     posY: 0,
-//     widthRatioToHeight: 0,
-//     heightRatioToWidth: 0,
-//     windowPadding: 0,
-//     windowWMax: 0,
-//     windowHMax: 0,
-//   };
+  this.settings = {
+    widthInit: 0,
+    heightInit: 0,
+    width: 0,
+    height: 0,
+    posX: 0,
+    posY: 0,
+    widthRatioToHeight: 0,
+    heightRatioToWidth: 0,
+    windowPadding: 0,
+    windowWMax: 0,
+    windowHMax: 0,
+  };
 
-//   this.refs = {
-//     $div: undefined,
-//     $img: undefined,
-//     loadCompleteCallback: undefined
-//   };
+  this.refs = {
+    $parent: undefined,
+    $container: undefined,
+    $image: undefined,
+    loadCompleteCallback: undefined
+  };
 
-//   this.isLoaded = false;
 
-//   this.init = (picture, id, hd) => {
-//     this.settings.id = id;
-//     this.refs.$div = picture;
-//     this.refs.$img = picture.querySelector('img');
+  this.init = (parent, id, imgURL) => {
+    this.refs.$parent = parent;
+    this.id = id;
+    this.imgURL = imgURL;
 
-//     const splittedURL = this.refs.$img.getAttribute('rel').split('/');
-//     this.settings.imgURL = splittedURL[0] + '/' + hd + splittedURL[1];
-//     this.settings.thumbURL = splittedURL[0] + '/' +  '_thumbs/' + splittedURL[1];
-//   };
+    this.refs.$container = document.createElement('div');
+    this.refs.$container.classList.add('picture');
+    this.refs.$parent.appendChild(this.refs.$container);
 
-//   this.load = (loadCompleteCallback) => {
-//     this.refs.$img.setAttribute('src', this.settings.imgURL);
-//     this.refs.$img.addEventListener('load', this.loadComplete);
-//     this.refs.loadCompleteCallback = loadCompleteCallback;
-//   };
+    //    <div class="picture is-even is-on-top is-active is-displayed is-loaded" data-bg="1" rel="0" style="width: 469.48px; height: 704px; left: 1869px; top: 64px;">
+    //       <div class="picture__mask">
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //         <div class="picture__rect"></div>
+    //       </div>
+    //       <img rel="images/51.jpg" class="picture__el" src="images/51.jpg">
+    //     </div>
+  };
 
-//   this.loadComplete = () => {
-//     const $imageClone = this.refs.$img.cloneNode(true);
-//     this.refs.$img.parentNode.replaceChild($imageClone, this.refs.$img);
-//     this.refs.$img = $imageClone;
+  this.load = (loadCompleteCallback) => {
+    this.refs.loadCompleteCallback = loadCompleteCallback;
+    this.createImage();
+  };
 
-//     setTimeout(() => { //safari debug naturalWidth
-//       this.settings.imgWidth = this.refs.$img.naturalWidth;
-//       this.settings.imgHeight = this.refs.$img.naturalHeight;
+  this.createImage = () => {
+    this.refs.$image = document.createElement('img');
+    this.refs.$image.setAttribute('src',  this.imgURL);
+    this.refs.$image.classList.add('picture__img');
+    this.refs.$image.addEventListener('load', this.imageLoadComplete);
+    this.refs.$container.appendChild(this.refs.$image);
+  }
 
-//       this.settings.widthRatioToHeight = this.settings.imgWidth / this.settings.imgHeight;
-//       this.settings.heightRatioToWidth = this.settings.imgHeight / this.settings.imgWidth;
+  this.imageLoadComplete = () => {
+    this.isLoaded = true;
 
-//       this.refs.loadCompleteCallback();
-//       this.refs.loadCompleteCallback = undefined;
+    this.refs.loadCompleteCallback();
+    this.refs.loadCompleteCallback = undefined;
 
-//       this.isLoaded = true;
-//       this.resize();
+    this.settings.widthInit = this.refs.$image.width;
+    this.settings.heightInit = this.refs.$image.height;
 
-//       this.refs.$div.classList.add('is-loaded');
-//     }, 100);
-//   };
+    this.settings.widthRatioToHeight = this.settings.widthInit / this.settings.heightInit;
+    this.settings.heightRatioToWidth = this.settings.heightInit / this.settings.widthInit;
 
-//   this.setWindowPadding = (padding) => {
-//     this.settings.windowPadding = padding;
-//     this.settings.windowWMax = Math.floor(windowW - 2 * padding);
-//     this.settings.windowHMax = Math.floor(windowH - 2 * padding);
-//   }
+    this.resize();
+  };
 
-//   this.resize = () => {
-//     if (this.isLoaded == true) {
-//       this.settings.height = this.settings.windowHMax;
-//       this.settings.width = this.settings.height *  this.settings.widthRatioToHeight;
-//       this.settings.posX = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowWMax - this.settings.width));
-//       this.settings.posY = this.settings.windowPadding;
+  this.display = () => {
+    this.refs.$container.classList.add('is-active');
+  }
 
-//       if (this.settings.width > this.settings.windowWMax) {
-//         this.settings.width = this.settings.windowWMax;
-//         this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
-//         this.settings.posX = this.settings.windowPadding;
-//         this.settings.posY = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowHMax - this.settings.height));
-//       }
+  this.setWindowPadding = (windowPadding) => {
+    this.settings.windowPadding = windowPadding;
+    this.settings.windowWMax = Math.floor(windowW - 2 * windowPadding);
+    this.settings.windowHMax = Math.floor(windowH - 2 * windowPadding);
+  }
 
-//       this.refs.$div.style.width = this.settings.width + 'px';
-//       this.refs.$div.style.height = this.settings.height + 'px';
-//       this.refs.$div.style.left = this.settings.posX + 'px';
-//       this.refs.$div.style.top = this.settings.posY + 'px';
-//     }
-//   };
-// };
+  this.resize = () => {
+    // if (this.isLoaded == true) {
+    //   this.settings.height = this.settings.windowHMax;
+    //   this.settings.width = this.settings.height *  this.settings.widthRatioToHeight;
+    //   this.settings.posX = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowWMax - this.settings.width));
+    //   this.settings.posY = this.settings.windowPadding;
+
+    //   if (this.settings.width > this.settings.windowWMax) {
+    //     this.settings.width = this.settings.windowWMax;
+    //     this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
+    //     this.settings.posX = this.settings.windowPadding;
+    //     this.settings.posY = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowHMax - this.settings.height));
+    //   }
+
+    //   this.refs.$div.style.width = this.settings.width + 'px';
+    //   this.refs.$div.style.height = this.settings.height + 'px';
+    //   this.refs.$div.style.left = this.settings.posX + 'px';
+    //   this.refs.$div.style.top = this.settings.posY + 'px';
+    // }
+  };
+};
 
 
 
@@ -169,6 +189,7 @@ const Thumb = function () {
     this.settings.heightInit = this.refs.$image.height;
 
     this.refs.loadCompleteCallback();
+    this.refs.loadCompleteCallback = undefined;
   };
 
   this.click = () => {
@@ -234,13 +255,12 @@ const Thumb = function () {
 //app
 const App = function () {
   this.settings = {
-    loadCurrentID: 0,
     loadThumbsCurrentID: 0,
     totalPictures: 0,
     currentID: 0,
-    previousID: undefined,
     windowPaddingRatioToW: 0.025,
     imagesFolderURL: '/images/',
+    imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
     areThumbsDisplayed: true,
   };
@@ -254,7 +274,10 @@ const App = function () {
     stepsYNumber: undefined,
     stepXDist: undefined,
     stepYDist: undefined,
+    $picturesContainer: undefined,
     picturesRep: undefined,
+    currentPicture: undefined,
+    previousPicture: undefined,
     $nav: undefined,
     $navPrev: undefined,
     $navNext: undefined,
@@ -298,12 +321,13 @@ const App = function () {
     //   }, 100);
     // });
 
+    this.refs.$picturesContainer = document.querySelector('.pictures');
     this.refs.$thumbsContainer = document.querySelector('.thumbs');
     this.refs.$thumbsButton = document.querySelector('.thumbs-button');
     this.refs.$thumbsButton.addEventListener('click', this.toggleThumbs);
     this.refs.$thumbsButton.addEventListener('touchstart', this.toggleThumbs);
 
-    const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? '_hd/' : '';
+    const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? this.settings.imagesHDFolderURL : '';
 
     this.refs.picturesRep = [];
     this.refs.thumbsRep = [];
@@ -318,11 +342,15 @@ const App = function () {
               this.thumbsClickListener
             );
       this.refs.thumbsRep.push(thumbItem);
-    });
 
-    // const pictureItem = new Picture();
-      //       pictureItem.init(picture, i, imgHDFolder);
-      // this.refs.picturesRep.push(pictureItem);
+      const pictureItem = new Picture();
+            pictureItem.init(
+              this.refs.$picturesContainer,
+              i,
+              this.settings.imagesFolderURL+imgHDFolder+item[0]
+            );
+      this.refs.picturesRep.push(pictureItem);
+    });
 
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
   };
@@ -336,10 +364,6 @@ const App = function () {
       this.settings.loadThumbsCurrentID++;
       this.refs.thumbsRep[this.settings.loadThumbsCurrentID].load(this.thumbsLoadCompleteListener);
     }
-  };
-
-  this.thumbsClickListener = (id) => {
-    this.toggleThumbs();
   };
 
   this.calculateThumbsPosition = () => {
@@ -384,14 +408,28 @@ const App = function () {
     }
   };
 
+  this.thumbsClickListener = (id) => {
+    this.toggleThumbs();
+    this.displayImage(id);
+  };
 
-  // this.loadComplete = () => {
-  //   this.settings.loadCurrentID ++;
+  this.displayImage = (id) => {
+    this.settings.currentID = id;
+    this.previousPicture = this.currentPicture
+    this.currentPicture = this.refs.picturesRep[this.settings.currentID];
 
-  //   if(this.settings.loadCurrentID < this.refs.picturesRep.length) {
-  //     this.refs.picturesRep[this.settings.loadCurrentID].load(this.loadComplete);
-  //   }
-  // };
+    this.updatePagination();
+
+    if (this.currentPicture.isLoaded == false) {
+      this.currentPicture.load(this.imageLoadCompleteListener);
+    } else {
+      this.currentPicture.display();
+    }
+  }
+
+  this.imageLoadCompleteListener = () => {
+    this.currentPicture.display();
+  };
 
   // this.changePicture = () => {
   //   this.updatePagination();
@@ -446,7 +484,6 @@ const App = function () {
 
   this.setPicturePrev = () => {
     if (this.settings.currentID > 0 ) {
-      this.settings.previousID = this.settings.currentID;
       this.settings.currentID--;
       this.updatePagination();
       // this.changePicture();
@@ -455,7 +492,6 @@ const App = function () {
 
   this.setPictureNext = () => {
     if (this.settings.currentID < this.settings.totalPictures - 1 ) {
-      this.settings.previousID = this.settings.currentID;
       this.settings.currentID++;
       this.updatePagination();
       // this.changePicture();
@@ -530,21 +566,21 @@ const App = function () {
   // };
 
   this.resize = () => {
-    const padding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
+    const windowPadding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
 
-    this.refs.$nav.style.right = padding + 'px';
-    this.refs.$nav.style.bottom = padding + 'px';
+    this.refs.$nav.style.right = windowPadding + 'px';
+    this.refs.$nav.style.bottom = windowPadding + 'px';
 
-    this.refs.$lightmodeButton.style.left = padding + 'px';
-    this.refs.$lightmodeButton.style.top = padding + 'px';
+    this.refs.$lightmodeButton.style.left = windowPadding + 'px';
+    this.refs.$lightmodeButton.style.top = windowPadding + 'px';
 
-    this.refs.$thumbsButton.style.right = padding + 'px';
-    this.refs.$thumbsButton.style.top = padding + 'px';
+    this.refs.$thumbsButton.style.right = windowPadding + 'px';
+    this.refs.$thumbsButton.style.top = windowPadding + 'px';
 
-    // this.refs.picturesRep.forEach((pictureItem) => {
-    //   pictureItem.setWindowPadding(padding);
-    //   pictureItem.resize();
-    // });
+    this.refs.picturesRep.forEach((pictureItem) => {
+      pictureItem.setWindowPadding(windowPadding);
+      pictureItem.resize();
+    });
 
     this.calculateThumbsPosition();
 
