@@ -10,6 +10,7 @@ const Picture = function () {
   this.id = 0;
   this.imgURL = '';
   this.isLoaded = false;
+  this.lightmode = 0;
 
   this.settings = {
     widthInit: 0,
@@ -23,40 +24,41 @@ const Picture = function () {
     windowPadding: 0,
     windowWMax: 0,
     windowHMax: 0,
+    stripesNumber: 10
   };
 
   this.refs = {
     $parent: undefined,
     $container: undefined,
+    $stripes: undefined,
     $image: undefined,
     loadCompleteCallback: undefined
   };
 
 
-  this.init = (parent, id, imgURL) => {
+  this.init = (parent, id, imgURL, lightmode) => {
     this.refs.$parent = parent;
     this.id = id;
     this.imgURL = imgURL;
+    this.lightmode = lightmode;
 
     this.refs.$container = document.createElement('div');
     this.refs.$container.classList.add('picture');
     this.refs.$parent.appendChild(this.refs.$container);
 
-    //    <div class="picture is-even is-on-top is-active is-displayed is-loaded" data-bg="1" rel="0" style="width: 469.48px; height: 704px; left: 1869px; top: 64px;">
-    //       <div class="picture__mask">
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //         <div class="picture__rect"></div>
-    //       </div>
-    //       <img rel="images/51.jpg" class="picture__el" src="images/51.jpg">
-    //     </div>
+    if(this.id % 2 == 0){
+      this.refs.$container.classList.add('is-even');
+    }
+
+    this.refs.$stripes = document.createElement('div');
+    this.refs.$stripes.classList.add('picture__stripes');
+    this.refs.$container.appendChild(this.refs.$stripes);
+
+    for (let i = 0; i < this.settings.stripesNumber; i++) {
+      const stripe = document.createElement('div');
+            stripe.classList.add('picture__stripe');
+      this.refs.$stripes.appendChild(stripe);
+    }
   };
 
   this.load = (loadCompleteCallback) => {
