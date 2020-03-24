@@ -24,7 +24,8 @@ const Picture = function () {
     windowPadding: 0,
     windowWMax: 0,
     windowHMax: 0,
-    stripesNumber: 10
+    stripesNumber: 10,
+    displayTimeoutDuration: 750 //thumb --d-mask
   };
 
   this.refs = {
@@ -32,7 +33,9 @@ const Picture = function () {
     $container: undefined,
     $stripes: undefined,
     $image: undefined,
-    loadCompleteCallback: undefined
+    loadCompleteCallback: undefined,
+    preloadCallback: undefined,
+    displayTimeout: undefined,
   };
 
 
@@ -61,18 +64,31 @@ const Picture = function () {
     }
   };
 
-  this.load = (loadCompleteCallback) => {
+  this.load = (loadCompleteCallback, preloadCallback) => {
     this.refs.loadCompleteCallback = loadCompleteCallback;
+    this.refs.preloadCallback = preloadCallback;
     this.createImage();
   };
 
   this.createImage = () => {
-    this.refs.$image = document.createElement('img');
-    this.refs.$image.setAttribute('src',  this.imgURL);
+    this.refs.$image = new Image();
+    this.refs.$image.load(this.imgURL);
     this.refs.$image.classList.add('picture__img');
     this.refs.$image.addEventListener('load', this.imageLoadComplete);
     this.refs.$container.appendChild(this.refs.$image);
+
+    requestAnimationFrame(this.imagePreload);
   }
+
+  this.imagePreload = () => {
+    this.refs.preloadCallback(this.refs.$image.completedPercentage);
+
+    if (this.refs.$image.completedPercentage < 100) {
+      requestAnimationFrame(this.imagePreload);
+    } else {
+      this.refs.preloadCallback = undefined;
+    }
+  };
 
   this.imageLoadComplete = () => {
     this.isLoaded = true;
@@ -83,6 +99,8 @@ const Picture = function () {
     this.settings.widthInit = this.refs.$image.width;
     this.settings.heightInit = this.refs.$image.height;
 
+    console.log("loaded "+ this.settings.widthInit + " "+ this.settings.heightInit);
+
     this.settings.widthRatioToHeight = this.settings.widthInit / this.settings.heightInit;
     this.settings.heightRatioToWidth = this.settings.heightInit / this.settings.widthInit;
 
@@ -90,7 +108,27 @@ const Picture = function () {
   };
 
   this.display = () => {
+    this.clearDisplayTimeout();
+    this.refs.displayTimeout = setTimeout(this.displayTimeoutListener, this.settings.displayTimeoutDuration);
+  }
+
+  this.displayTimeoutListener = () => {
     this.refs.$container.classList.add('is-active');
+    this.refs.$container.classList.add('is-on-top');
+
+    this.clearDisplayTimeout();
+    this.refs.displayTimeout = setTimeout(this.displayCompleteTimeoutListener, 100);
+  };
+
+  this.displayCompleteTimeoutListener = () => {
+    this.refs.$container.classList.add('is-displayed');
+  };
+
+  this.clearDisplayTimeout = () => {
+    if (this.refs.displayTimeout) {
+      clearTimeout(this.refs.displayTimeout);
+      this.refs.displayTimeout = undefined;
+    }
   }
 
   this.setWindowPadding = (windowPadding) => {
@@ -100,24 +138,24 @@ const Picture = function () {
   }
 
   this.resize = () => {
-    // if (this.isLoaded == true) {
-    //   this.settings.height = this.settings.windowHMax;
-    //   this.settings.width = this.settings.height *  this.settings.widthRatioToHeight;
-    //   this.settings.posX = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowWMax - this.settings.width));
-    //   this.settings.posY = this.settings.windowPadding;
+    if (this.isLoaded == true) {
+      this.settings.height = this.settings.windowHMax;
+      this.settings.width = this.settings.height *  this.settings.widthRatioToHeight;
+      this.settings.posX = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowWMax - this.settings.width));
+      this.settings.posY = this.settings.windowPadding;
 
-    //   if (this.settings.width > this.settings.windowWMax) {
-    //     this.settings.width = this.settings.windowWMax;
-    //     this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
-    //     this.settings.posX = this.settings.windowPadding;
-    //     this.settings.posY = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowHMax - this.settings.height));
-    //   }
+      if (this.settings.width > this.settings.windowWMax) {
+        this.settings.width = this.settings.windowWMax;
+        this.settings.height = this.settings.width * this.settings.heightRatioToWidth;
+        this.settings.posX = this.settings.windowPadding;
+        this.settings.posY = Math.floor( this.settings.windowPadding + Math.random() * (this.settings.windowHMax - this.settings.height));
+      }
 
-    //   this.refs.$div.style.width = this.settings.width + 'px';
-    //   this.refs.$div.style.height = this.settings.height + 'px';
-    //   this.refs.$div.style.left = this.settings.posX + 'px';
-    //   this.refs.$div.style.top = this.settings.posY + 'px';
-    // }
+      this.refs.$container.style.width = this.settings.width + 'px';
+      this.refs.$container.style.height = this.settings.height + 'px';
+      this.refs.$container.style.left = this.settings.posX + 'px';
+      this.refs.$container.style.top = this.settings.posY + 'px';
+    }
   };
 };
 
@@ -254,6 +292,7 @@ const Thumb = function () {
 
 
 
+
 //app
 const App = function () {
   this.settings = {
@@ -268,6 +307,7 @@ const App = function () {
   };
 
   this.refs = {
+    $logo: undefined,
     $thumbsContainer: undefined,
     $thumbsButton: undefined,
     thumbsRep: undefined,
@@ -294,6 +334,8 @@ const App = function () {
   };
 
   this.init = () => {
+    this.refs.$logo = document.querySelector('.logo');
+
     this.refs.$nav = document.querySelector('.navigation');
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
     this.refs.$navNext = document.querySelector('.navigation-button--next');
@@ -411,7 +453,6 @@ const App = function () {
   };
 
   this.thumbsClickListener = (id) => {
-    this.toggleThumbs();
     this.displayImage(id);
   };
 
@@ -423,14 +464,29 @@ const App = function () {
     this.updatePagination();
 
     if (this.currentPicture.isLoaded == false) {
-      this.currentPicture.load(this.imageLoadCompleteListener);
+      this.currentPicture.load(this.imageLoadCompleteListener, this.imagePreloadListener);
+      document.body.classList.remove('is-loaded');
+      document.body.classList.add('is-loading');
     } else {
       this.currentPicture.display();
+      if (this.settings.areThumbsDisplayed == true) {
+        this.toggleThumbs();
+      }
     }
-  }
+  };
+
+  this.imagePreloadListener = (completedPercentage) => {
+    this.refs.$logo.style.setProperty('--s-loaded', completedPercentage / 100);
+  };
 
   this.imageLoadCompleteListener = () => {
+    document.body.classList.add('is-loaded');
+    document.body.classList.remove('is-loading');
+
     this.currentPicture.display();
+    if (this.settings.areThumbsDisplayed == true) {
+      this.toggleThumbs();
+    }
   };
 
   // this.changePicture = () => {
@@ -625,5 +681,31 @@ const init = () => {
 
   document.body.classList.add('is-computed');
 };
+
+
+
+
+//utils
+Image.prototype.load = function(url){
+  var thisImg = this;
+  var xmlHTTP = new XMLHttpRequest();
+  xmlHTTP.open('GET', url,true);
+  xmlHTTP.responseType = 'arraybuffer';
+  xmlHTTP.onload = function(e) {
+    var blob = new Blob([this.response]);
+    thisImg.src = window.URL.createObjectURL(blob);
+  };
+  xmlHTTP.onprogress = function(e) {
+    thisImg.completedPercentage = parseInt((e.loaded / e.total) * 100);
+  };
+  xmlHTTP.onloadstart = function() {
+    thisImg.completedPercentage = 0;
+  };
+  xmlHTTP.send();
+};
+
+Image.prototype.completedPercentage = 0;
+
+
 
 init();

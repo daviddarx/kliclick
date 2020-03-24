@@ -18,10 +18,34 @@
   text-shadow: none;
 }
 
+@keyframes twerk {
+  10%,
+  90% {
+    transform: translate3d(calc(var(--s-twerk) * -1), calc(var(--s-twerk) * 1), 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(calc(var(--s-twerk) * -1), calc(var(--s-twerk) * 1), 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(calc(var(--s-twerk) * 1), calc(var(--s-twerk) * -1), 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(calc(var(--s-twerk) * 1), calc(var(--s-twerk) * 1), 0);
+  }
+}
+
 html {
   --s-buttons: 24px;
   --s-navigation-height: 48px;
   --s-navigation-spacing: 4px;
+  --s-twerk: 1px;
   --c-background: rgba(255, 255, 255, 1);
   --c-interaction: rgba(0, 0, 0, 1);
   --d-interaction: 0.2s;
@@ -62,11 +86,53 @@ body {
 }
 
 .logo {
+  --s-loader-position: 29.7%;
+  --s-loaded: 0;
+
   pointer-events: none;
   position: fixed;
   z-index: 5000;
   top: 50%;
   left: 50%;
+  transition: opacity linear 0.2s;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background-color: var(--c-interaction);
+    left: -50%;
+    top: var(--s-loader-position);
+    transition: transform var(--e-inout) 0.2s;
+    transform-origin: top left;
+    transform: scaleX(var(--s-loaded));
+  }
+
+  &::before {
+    top: calc(var(--s-loader-position) * -1);
+    transform-origin: top right;
+  }
+
+  .is-loading & {
+    animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
+  }
+
+  .is-loaded & {
+    opacity: 0;
+    transition-delay: 0.3s;
+
+    &::before,
+    &::after {
+      transform: scaleX(0);
+      transform-origin: top right;
+    }
+
+    &::before {
+      transform-origin: top left;
+    }
+  }
 
   .thumbs-displayed & {
     mix-blend-mode: overlay;
@@ -305,7 +371,16 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 1;
+}
+
+.thumbs {
+  z-index: 2;
+
+  .is-loading & {
+    animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
+    animation-delay: 0.2s;
+    overflow: auto;
+  }
 }
 
 .thumb {
@@ -359,6 +434,7 @@ body {
 
 .pictures {
   z-index: 0;
+  pointer-events: none;
 }
 
 .picture {
@@ -373,54 +449,58 @@ body {
     display: block;
   }
 
-  // &.is-on-top {
-  //   z-index: 1;
-  // }
+  &.is-on-top {
+    z-index: 1;
+  }
 
-  // &__img {
-  //   display: block;
-  //   width: 100%;
-  //   transition: transform var(--e-inout) 1.5s;
-  //   transform: scale(1.8);
-  //   will-change: transform;
+  &__img {
+    display: block;
+    width: 100%;
+    transition: transform var(--e-inout) 1.5s;
+    transform: scale(1.8);
+    will-change: transform;
 
-  //   #{$root}.is-displayed & {
-  //     transform: scale(1);
-  //     transition-timing-function: var(--e-out);
-  //   }
-  // }
+    #{$root}.is-displayed & {
+      transform: scale(1);
+      transition-timing-function: var(--e-out);
+    }
+  }
 
-  // &__stripes {
-  //   position: absolute;
-  //   display: flex;
-  //   z-index: 100;
-  //   left: 0;
-  //   width: 100%;
-  //   height: 100%;
-  // }
+  &__stripes {
+    position: absolute;
+    display: flex;
+    z-index: 100;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-  // &__stripe {
-  //   --d-delay: 0.05;
+  &__stripe {
+    --d-delay: 0.05;
 
-  //   width: 11%;
-  //   height: 100%;
-  //   background-color: var(--c-background);
-  //   transition: transform var(--e-inout) 0.5s;
-  //   transform-origin: top left;
-  //   will-change: transform;
+    width: 11%;
+    height: 100%;
+    background-color: var(--c-background);
+    transition: transform var(--e-inout) 0.5s;
+    transform-origin: top left;
+    will-change: transform;
 
-  //   .is-inverted & {
-  //     background-color: white;
-  //   }
+    // .is-inverted & {
+    //   background-color: white;
+    // }
 
-  //   @for $i from 1 to 11 {
-  //     &:nth-child(#{$i}) {
-  //       transition-delay: calc(#{$i}s * var(--d-delay));
-  //     }
-  //   }
+    @for $i from 1 to 11 {
+      &:nth-child(#{$i}) {
+        transition-delay: calc(#{$i}s * var(--d-delay));
+      }
+    }
 
-  //   #{$root}.is-displayed & {
-  //     transform: scaleX(0);
-  //   }
-  // }
+    #{$root}.is-displayed & {
+      transform: scaleX(0);
+
+      .thumbs-displayed & {
+        transform: scaleX(1);
+      }
+    }
+  }
 }
