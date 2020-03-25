@@ -78,7 +78,9 @@ const Picture = function () {
   }
 
   this.imagePreload = () => {
-    this.refs.preloadCallback(this.refs.$image.completedPercentage);
+    if (this.refs.preloadCallback) {
+      this.refs.preloadCallback(this.refs.$image.completedPercentage);
+    }
 
     if (this.refs.$image.completedPercentage < 100) {
       requestAnimationFrame(this.imagePreload);
@@ -88,10 +90,16 @@ const Picture = function () {
   };
 
   this.imageLoadComplete = () => {
+    console.log(this.id + " loaded");
+
     this.isLoaded = true;
 
-    this.refs.loadCompleteCallback();
-    this.refs.loadCompleteCallback = undefined;
+    if (this.refs.loadCompleteCallback) {
+      this.refs.loadCompleteCallback();
+      this.refs.loadCompleteCallback = undefined;
+    } else {
+      console.log("pas de callback");
+    }
 
     this.settings.widthInit = this.refs.$image.width;
     this.settings.heightInit = this.refs.$image.height;
@@ -391,6 +399,7 @@ const App = function () {
     });
 
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
+    this.refs.picturesRep[0].load();
   };
 
   this.thumbsLoadCompleteListener = () => {
@@ -489,7 +498,6 @@ const App = function () {
   };
 
   // this.changePicture = () => {
-  //   this.updatePagination();
 
   //   this.refs.$navPrev.classList.remove('is-disabled');
   //   this.refs.$navNext.classList.remove('is-disabled');
