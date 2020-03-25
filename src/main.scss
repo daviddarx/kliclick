@@ -50,6 +50,7 @@ html {
   --c-interaction: rgba(0, 0, 0, 1);
   --d-interaction: 0.2s;
   --d-opacity-computed: 0.5s;
+  --d-thumbs-mask: 0.75s;
   --e-out: cubic-bezier(0.165, 0.84, 0.44, 1); //quart
   --e-inout: cubic-bezier(0.77, 0, 0.175, 1); //quart
 }
@@ -387,14 +388,13 @@ body {
   --s-mask-margin: -2px;
   --s-scale: 0;
   --s-scale-hover: 1;
-  --d-mask: 0.75s;
 
   cursor: pointer;
   position: absolute;
   display: inline-block;
   visibility: hidden;
   transform: scale(var(--s-scale));
-  transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-mask);
+  transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-thumbs-mask);
 
   &::after {
     content: "";
@@ -405,7 +405,7 @@ body {
     right: var(--s-mask-margin);
     background-color: var(--c-background);
     transform-origin: top right;
-    transition: transform var(--e-inout) var(--d-mask);
+    transition: transform var(--e-inout) var(--d-thumbs-mask);
   }
 
   &.loaded {
@@ -485,13 +485,9 @@ body {
     transform-origin: top left;
     will-change: transform;
 
-    // .is-inverted & {
-    //   background-color: white;
-    // }
-
     @for $i from 1 to 11 {
       &:nth-child(#{$i}) {
-        transition-delay: calc(#{$i}s * var(--d-delay));
+        transition-delay: calc(#{$i}s * var(--d-delay) + var(--d-thumbs-mask));
       }
     }
 

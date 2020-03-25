@@ -24,8 +24,7 @@ const Picture = function () {
     windowPadding: 0,
     windowWMax: 0,
     windowHMax: 0,
-    stripesNumber: 10,
-    displayTimeoutDuration: 750 //thumb --d-mask
+    stripesNumber: 10
   };
 
   this.refs = {
@@ -99,8 +98,6 @@ const Picture = function () {
     this.settings.widthInit = this.refs.$image.width;
     this.settings.heightInit = this.refs.$image.height;
 
-    console.log("loaded "+ this.settings.widthInit + " "+ this.settings.heightInit);
-
     this.settings.widthRatioToHeight = this.settings.widthInit / this.settings.heightInit;
     this.settings.heightRatioToWidth = this.settings.heightInit / this.settings.widthInit;
 
@@ -108,19 +105,14 @@ const Picture = function () {
   };
 
   this.display = () => {
-    this.clearDisplayTimeout();
-    this.refs.displayTimeout = setTimeout(this.displayTimeoutListener, this.settings.displayTimeoutDuration);
-  }
-
-  this.displayTimeoutListener = () => {
     this.refs.$container.classList.add('is-active');
     this.refs.$container.classList.add('is-on-top');
 
     this.clearDisplayTimeout();
-    this.refs.displayTimeout = setTimeout(this.displayCompleteTimeoutListener, 100);
-  };
+    this.refs.displayTimeout = setTimeout(this.displayTimeoutListener, 100);
+  }
 
-  this.displayCompleteTimeoutListener = () => {
+  this.displayTimeoutListener = () => {
     this.refs.$container.classList.add('is-displayed');
   };
 
@@ -304,6 +296,9 @@ const App = function () {
     imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
     areThumbsDisplayed: true,
+    changeLightModeTimeoutDuration: 1000,
+    isPictureCalledFromThumbs: false,
+    lightmodeChangeAdditionalThumbsDelay: 750
   };
 
   this.refs = {
@@ -326,7 +321,7 @@ const App = function () {
     $lightmodeButton: undefined,
     $paginationCurrent: undefined,
     $paginationTotal: undefined,
-    // timeoutChangeLightmode: undefined,
+    timeoutChangeLightmode: undefined,
     // timeoutDisplayNextPicture: undefined,
     // timeoutHidePreviousPicture: undefined,
     // timeoutWheelDebounce: undefined,
@@ -391,7 +386,8 @@ const App = function () {
             pictureItem.init(
               this.refs.$picturesContainer,
               i,
-              this.settings.imagesFolderURL+imgHDFolder+item[0]
+              this.settings.imagesFolderURL+imgHDFolder+item[0],
+              item[1]
             );
       this.refs.picturesRep.push(pictureItem);
     });
@@ -453,6 +449,7 @@ const App = function () {
   };
 
   this.thumbsClickListener = (id) => {
+    this.settings.isPictureCalledFromThumbs = true;
     this.displayImage(id);
   };
 
@@ -484,8 +481,12 @@ const App = function () {
     document.body.classList.remove('is-loading');
 
     this.currentPicture.display();
+
     if (this.settings.areThumbsDisplayed == true) {
       this.toggleThumbs();
+      this.changeLightmode(this.currentPicture.lightmode, this.settings.lightmodeChangeAdditionalThumbsDelay);
+    } else {
+      this.changeLightmode(this.currentPicture.lightmode, 0);
     }
   };
 
@@ -601,16 +602,24 @@ const App = function () {
   };
 
   this.changeLightmode = (isLight) => {
+    let additionalDelay = 0;
+
+    if (this.settings.isPictureCalledFromThumbs == true) {
+      additionalDelay = this.settings.lightmodeChangeAdditionalThumbsDelay;
+      this.settings.isPictureCalledFromThumbs = false;
+    }
+
     if (this.refs.timeoutChangeLightmode != undefined) {
       clearTimeout(this.refs.timeoutChangeLightmode);
     }
+
     this.refs.timeoutChangeLightmode = setTimeout( () => {
-      if (isLight == 1) {
+      if (isLight == 0) {
         document.body.classList.add('is-inverted');
       }else {
         document.body.classList.remove('is-inverted');
       }
-    }, 1000);
+    }, this.settings.changeLightModeTimeoutDuration + additionalDelay);
   }
 
   // this.navigateWheel = (delta) => {
