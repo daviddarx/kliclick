@@ -1,5 +1,3 @@
-import * as PIXI from 'pixi.js'
-import gsap from "gsap/all"
 import * as content from '../content/pictures.json'
 
 delete content.default;
