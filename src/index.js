@@ -498,16 +498,6 @@ const App = function () {
   };
 
   // this.changePicture = () => {
-
-  //   this.refs.$navPrev.classList.remove('is-disabled');
-  //   this.refs.$navNext.classList.remove('is-disabled');
-
-  //   if (this.settings.currentID == 0) {
-  //     this.refs.$navPrev.classList.add('is-disabled');
-  //   } else if (this.settings.currentID == this.settings.totalPictures - 1) {
-  //     this.refs.$navNext.classList.add('is-disabled');
-  //   }
-
   //   this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
   //   this.refs.$pictures[this.settings.currentID].classList.add('is-active');
 
@@ -550,17 +540,21 @@ const App = function () {
   this.setPicturePrev = () => {
     if (this.settings.currentID > 0 ) {
       this.settings.currentID--;
-      this.updatePagination();
-      // this.changePicture();
+    } else {
+      this.settings.currentID = this.refs.picturesRep.length - 1;
     }
+    this.updatePagination();
+    // this.changePicture();
   };
 
   this.setPictureNext = () => {
     if (this.settings.currentID < this.settings.totalPictures - 1 ) {
       this.settings.currentID++;
-      this.updatePagination();
-      // this.changePicture();
+    } else {
+      this.settings.currentID = 0;
     }
+    this.updatePagination();
+    // this.changePicture();
   };
 
   this.navigateButton = (e) => {

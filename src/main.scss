@@ -228,7 +228,6 @@ body {
   width: var(--s-buttons);
   height: var(--s-navigation-height);
   margin-top: var(--s-navigation-spacing);
-  transition: opacity ease-out var(--d-interaction);
 
   &::before,
   &::after {
@@ -274,11 +273,6 @@ body {
     left: 50%;
     background-color: var(--c-interaction);
     transition: background-color ease-out var(--d-interaction);
-  }
-
-  &.is-disabled {
-    opacity: 0;
-    pointer-events: none;
   }
 }
 
