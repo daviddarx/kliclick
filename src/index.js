@@ -90,15 +90,11 @@ const Picture = function () {
   };
 
   this.imageLoadComplete = () => {
-    console.log(this.id + " loaded");
-
     this.isLoaded = true;
 
     if (this.refs.loadCompleteCallback) {
       this.refs.loadCompleteCallback();
       this.refs.loadCompleteCallback = undefined;
-    } else {
-      console.log("pas de callback");
     }
 
     this.settings.widthInit = this.refs.$image.width;
