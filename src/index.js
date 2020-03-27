@@ -498,6 +498,7 @@ const App = function () {
     if (this.refs.previousPicture) {
       this.refs.previousPicture.removeFromTop();
       this.refs.previousPicture.remove();
+      this.refs.previousPicture.hide();
     }
 
     this.refs.previousPicture = this.refs.currentPicture;
