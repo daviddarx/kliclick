@@ -51,6 +51,9 @@ html {
   --d-interaction: 0.2s;
   --d-opacity-computed: 0.5s;
   --d-thumbs-mask: 0.75s;
+  --d-pictures-mask: 0.5s;
+  --d-pictures-mask-delay: 0.05;
+  --d-pictures-mask-delay-for-thumbs: 0s;
   --e-out: cubic-bezier(0.165, 0.84, 0.44, 1); //quart
   --e-inout: cubic-bezier(0.77, 0, 0.175, 1); //quart
 }
@@ -470,18 +473,16 @@ body {
   }
 
   &__stripe {
-    --d-delay: 0.05;
-
     width: 11%;
     height: 100%;
     background-color: var(--c-background);
-    transition: transform var(--e-inout) 0.5s;
+    transition: transform var(--e-inout) var(--d-pictures-mask);
     transform-origin: top left;
     will-change: transform;
 
     @for $i from 1 to 11 {
       &:nth-child(#{$i}) {
-        transition-delay: calc(#{$i}s * var(--d-delay) + var(--d-thumbs-mask));
+        transition-delay: calc(#{$i}s * var(--d-pictures-mask-delay) + var(--d-pictures-mask-delay-for-thumbs));
       }
     }
 

@@ -258,8 +258,18 @@ const Picture = function () {
     }
   }
 
-  this.hide = () => {
-    this.refs.$container.remove.add('is-on-top');
+  this.removeFromTop = () => {
+    this.refs.$container.classList.remove('is-on-top');
+  };
+
+  this.hide = (pictureAnimationOutDuration) => {
+    this.refs.$container.classList.remove('is-displayed');
+
+    this.refs.removeTimeout = setTimeout(this.remove, pictureAnimationOutDuration);
+  };
+
+  this.remove = () => {
+    this.refs.$container.classList.remove('is-active');
   };
 
   this.setWindowPadding = (windowPadding) => {
@@ -305,9 +315,8 @@ const App = function () {
     imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
     areThumbsDisplayed: true,
-    changeLightModeTimeoutDuration: 1000,
-    isPictureCalledFromThumbs: false,
-    lightmodeChangeAdditionalThumbsDelay: 750
+    picturesMaskAnimationDuration: 0,
+    thumbsMaskAnimationDuration: 0
   };
 
   this.refs = {
@@ -331,13 +340,17 @@ const App = function () {
     $paginationCurrent: undefined,
     $paginationTotal: undefined,
     timeoutChangeLightmode: undefined,
-    // timeoutDisplayNextPicture: undefined,
-    // timeoutHidePreviousPicture: undefined,
+    timeoutDisplayNextPicture: undefined,
+    timeoutHidePrevPicture: undefined,
+    timeoutCloseThumbs: undefined,
     // timeoutWheelDebounce: undefined,
-    // pictureToHide: undefined,
   };
 
   this.init = () => {
+    const bodyStyle = getComputedStyle(document.body);
+    this.settings.thumbsMaskAnimationDuration = parseFloat(bodyStyle.getPropertyValue('--d-thumbs-mask').split('s')[0]) * 1000;
+    this.settings.picturesMaskAnimationDuration = (parseFloat(bodyStyle.getPropertyValue('--d-pictures-mask').split('s')[0]) + 10 * parseFloat(bodyStyle.getPropertyValue('--d-pictures-mask-delay'))) * 1000;
+
     this.refs.$logo = document.querySelector('.logo');
 
     this.refs.$nav = document.querySelector('.navigation');
@@ -450,7 +463,14 @@ const App = function () {
   };
 
   this.toggleThumbs = () => {
+    if (this.settings.timeoutCloseThumbs) {
+      clearTimeout(this.settings.timeoutCloseThumbs);
+    }
+
     if (this.settings.areThumbsDisplayed == true) {
+      document.body.style.setProperty('--d-pictures-mask-delay-for-thumbs', this.settings.thumbsMaskAnimationDuration / 1000 + 's');
+      this.settings.timeoutCloseThumbs = setTimeout(this.reinitThumbsDelayForPictures, this.settings.thumbsMaskAnimationDuration);
+
       document.body.classList.remove('thumbs-displayed');
       this.settings.areThumbsDisplayed = false;
     } else {
@@ -459,8 +479,11 @@ const App = function () {
     }
   };
 
+  this.reinitThumbsDelayForPictures = () => {
+    document.body.style.setProperty('--d-pictures-mask-delay-for-thumbs', '0s');
+  };
+
   this.thumbsClickListener = (id) => {
-    this.settings.isPictureCalledFromThumbs = true;
     this.displayImage(id);
   };
 
@@ -468,6 +491,16 @@ const App = function () {
     this.settings.currentID = id;
     this.refs.previousPicture = this.refs.currentPicture;
     this.refs.currentPicture = this.refs.picturesRep[this.settings.currentID];
+
+    const prevPictureToLoad = this.refs.picturesRep[ (this.settings.currentID > 0) ? this.settings.currentID-1 : this.refs.picturesRep.length - 1 ];
+    const nextPictureToLoad = this.refs.picturesRep[ (this.settings.currentID < this.settings.totalPictures - 1) ? this.settings.currentID+1 : 0 ];
+
+    if (prevPictureToLoad.isLoaded == false) {
+      prevPictureToLoad.load();
+    }
+    if (nextPictureToLoad.isLoaded == false) {
+      nextPictureToLoad.load();
+    }
 
     if (this.refs.currentPicture.isLoaded == false) {
       this.refs.currentPicture.load(this.imageLoadCompleteListener, this.imagePreloadListener);
@@ -486,59 +519,42 @@ const App = function () {
     document.body.classList.add('is-loaded');
     document.body.classList.remove('is-loading');
 
-    if(this.refs.previousPicture){
-      this.refs.previousPicture.hide();
+    this.updatePagination();
+
+    if (this.refs.timeoutDisplayNextPicture != undefined) {
+      clearTimeout(this.refs.timeoutDisplayNextPicture);
+    }
+    if (this.refs.timeoutHidePrevPicture != undefined) {
+      clearTimeout(this.refs.timeoutHidePrevPicture);
     }
 
-    this.refs.currentPicture.display();
+    if(this.refs.previousPicture){
+      this.refs.previousPicture.removeFromTop();
+      this.refs.timeoutDisplayNextPicture = setTimeout(
+        this.launchImageHiding,
+        this.settings.picturesMaskAnimationDuration
+      );
+    }
+
+    this.refs.timeoutDisplayNextPicture = setTimeout(
+      this.launchImageDisplaying,
+      (this.settings.areThumbsDisplayed == true) ? this.settings.thumbsMaskAnimationDuration : 100
+    );
 
     if (this.settings.areThumbsDisplayed == true) {
       this.toggleThumbs();
-      this.changeLightmode(this.refs.currentPicture.lightmode, this.settings.lightmodeChangeAdditionalThumbsDelay);
-    } else {
-      this.changeLightmode(this.refs.currentPicture.lightmode, 0);
     }
   };
 
-  // this.changePicture = () => {
-  //   this.refs.$pictures[this.settings.currentID].classList.add('is-on-top');
-  //   this.refs.$pictures[this.settings.currentID].classList.add('is-active');
+  this.launchImageHiding = () => {
+    this.refs.previousPicture.hide(this.settings.picturesMaskAnimationDuration)
+  };
 
-  //   this.changeLightmode(true);
-
-  //   if (this.refs.timeoutDisplayNextPicture != undefined) {
-  //     clearTimeout(this.refs.timeoutDisplayNextPicture);
-  //   }
-  //   this.refs.timeoutDisplayNextPicture = setTimeout(this.displayNextPicture, 100);
-
-  //   if (this.settings.previousID != undefined) {
-  //     this.refs.$pictures[this.settings.previousID].classList.remove('is-on-top');
-  //     if (this.refs.timeoutHidePreviousPicture != undefined) {
-  //       clearTimeout(this.refs.timeoutHidePreviousPicture);
-  //       if (this.settings.currentID != parseInt(this.refs.pictureToHide.getAttribute("rel"))) { //to avoid overwriting bug if user go next/prev quickly
-  //         this.deactivePreviousPicture();
-  //       }
-  //     }
-  //     this.refs.pictureToHide = this.refs.$pictures[this.settings.previousID];
-  //     this.refs.timeoutHidePreviousPicture = setTimeout(this.hidePreviousPicture, 1000);
-  //   }
-  // };
-
-  // this.displayNextPicture = () => {
-  //   this.refs.$pictures[this.settings.currentID].classList.add('is-displayed');
-  //   this.refs.timeoutDisplayNextPicture = undefined;
-  // };
-
-  // this.hidePreviousPicture = () => {
-  //   this.refs.pictureToHide.classList.remove('is-displayed');
-  //   this.refs.timeoutHidePreviousPicture = setTimeout(this.deactivePreviousPicture, 1700);
-  // };
-
-  // this.deactivePreviousPicture = () => {
-  //   this.refs.pictureToHide.classList.remove('is-displayed'); //for direct call to overwrite first animation out step
-  //   this.refs.pictureToHide.classList.remove('is-active');
-  //   this.refs.timeoutHidePreviousPicture = undefined;
-  // };
+  this.launchImageDisplaying = () => {
+    this.refs.currentPicture.display();
+    this.changeLightmode(this.refs.currentPicture.lightmode);
+    this.refs.timeoutDisplayNextPicture = undefined;
+  };
 
   this.setPicturePrev = () => {
     if (this.settings.currentID == undefined) {
@@ -563,7 +579,6 @@ const App = function () {
         this.settings.currentID = 0;
       }
     }
-    console.log(this.settings.currentID);
     this.displayImage(this.settings.currentID);
   };
 
@@ -612,13 +627,6 @@ const App = function () {
   };
 
   this.changeLightmode = (isLight) => {
-    let additionalDelay = 0;
-
-    if (this.settings.isPictureCalledFromThumbs == true) {
-      additionalDelay = this.settings.lightmodeChangeAdditionalThumbsDelay;
-      this.settings.isPictureCalledFromThumbs = false;
-    }
-
     if (this.refs.timeoutChangeLightmode != undefined) {
       clearTimeout(this.refs.timeoutChangeLightmode);
     }
@@ -629,7 +637,7 @@ const App = function () {
       }else {
         document.body.classList.remove('is-inverted');
       }
-    }, this.settings.changeLightModeTimeoutDuration + additionalDelay);
+    }, this.settings.picturesMaskAnimationDuration);
   }
 
   // this.navigateWheel = (delta) => {
