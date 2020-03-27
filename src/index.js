@@ -125,6 +125,10 @@ const Picture = function () {
     }
   }
 
+  this.hide = () => {
+    this.refs.$container.remove.add('is-on-top');
+  };
+
   this.setWindowPadding = (windowPadding) => {
     this.settings.windowPadding = windowPadding;
     this.settings.windowWMax = Math.floor(windowW - 2 * windowPadding);
@@ -292,7 +296,7 @@ const App = function () {
   this.settings = {
     loadThumbsCurrentID: 0,
     totalPictures: 0,
-    currentID: 0,
+    currentID: undefined,
     windowPaddingRatioToW: 0.025,
     imagesFolderURL: '/images/',
     imagesHDFolderURL: '_hd/',
@@ -459,20 +463,15 @@ const App = function () {
 
   this.displayImage = (id) => {
     this.settings.currentID = id;
-    this.previousPicture = this.currentPicture
-    this.currentPicture = this.refs.picturesRep[this.settings.currentID];
+    this.refs.previousPicture = this.refs.currentPicture;
+    this.refs.currentPicture = this.refs.picturesRep[this.settings.currentID];
 
-    this.updatePagination();
-
-    if (this.currentPicture.isLoaded == false) {
-      this.currentPicture.load(this.imageLoadCompleteListener, this.imagePreloadListener);
+    if (this.refs.currentPicture.isLoaded == false) {
+      this.refs.currentPicture.load(this.imageLoadCompleteListener, this.imagePreloadListener);
       document.body.classList.remove('is-loaded');
       document.body.classList.add('is-loading');
     } else {
-      this.currentPicture.display();
-      if (this.settings.areThumbsDisplayed == true) {
-        this.toggleThumbs();
-      }
+      this.imageLoadCompleteListener();
     }
   };
 
@@ -484,13 +483,17 @@ const App = function () {
     document.body.classList.add('is-loaded');
     document.body.classList.remove('is-loading');
 
-    this.currentPicture.display();
+    if(this.refs.previousPicture){
+      this.refs.previousPicture.hide();
+    }
+
+    this.refs.currentPicture.display();
 
     if (this.settings.areThumbsDisplayed == true) {
       this.toggleThumbs();
-      this.changeLightmode(this.currentPicture.lightmode, this.settings.lightmodeChangeAdditionalThumbsDelay);
+      this.changeLightmode(this.refs.currentPicture.lightmode, this.settings.lightmodeChangeAdditionalThumbsDelay);
     } else {
-      this.changeLightmode(this.currentPicture.lightmode, 0);
+      this.changeLightmode(this.refs.currentPicture.lightmode, 0);
     }
   };
 
@@ -535,23 +538,30 @@ const App = function () {
   // };
 
   this.setPicturePrev = () => {
-    if (this.settings.currentID > 0 ) {
-      this.settings.currentID--;
-    } else {
+    if (this.settings.currentID == undefined) {
       this.settings.currentID = this.refs.picturesRep.length - 1;
+    } else {
+      if (this.settings.currentID > 0 ) {
+        this.settings.currentID--;
+      } else {
+        this.settings.currentID = this.refs.picturesRep.length - 1;
+      }
     }
-    this.updatePagination();
-    // this.changePicture();
+    this.displayImage(this.settings.currentID);
   };
 
   this.setPictureNext = () => {
-    if (this.settings.currentID < this.settings.totalPictures - 1 ) {
-      this.settings.currentID++;
-    } else {
+    if (this.settings.currentID == undefined) {
       this.settings.currentID = 0;
+    } else {
+      if (this.settings.currentID < this.settings.totalPictures - 1 ) {
+        this.settings.currentID++;
+      } else {
+        this.settings.currentID = 0;
+      }
     }
-    this.updatePagination();
-    // this.changePicture();
+    console.log(this.settings.currentID);
+    this.displayImage(this.settings.currentID);
   };
 
   this.navigateButton = (e) => {
@@ -580,7 +590,7 @@ const App = function () {
 
   this.updatePagination = () => {
     let zero = '';
-    let current = this.settings.totalPictures - this.settings.currentID;
+    let current = (this.settings.currentID == undefined) ? 0 : this.settings.totalPictures - this.settings.currentID;
 
     if (this.settings.totalPictures >= 10 && current < 10) {
       zero = '0';
