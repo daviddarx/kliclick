@@ -317,6 +317,7 @@ const App = function () {
     imagesFolderURL: '/images/',
     imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
+    thumbsMaxNumber: 100,
     areThumbsDisplayed: true,
     pictureDisplayedFromThumb: false,
     picturesMaskAnimationDuration: 0,
@@ -399,14 +400,15 @@ const App = function () {
     this.refs.thumbsRepToRender = [];
 
     contentArray.forEach((item, i) => {
-      const thumbItem = new Thumb();
-            thumbItem.init(
-              this.refs.$thumbsContainer,
-              i,
-              this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0],
-              this.thumbsClickListener
-            );
-      this.refs.thumbsRep.push(thumbItem);
+      if (i < this.settings.thumbsMaxNumber) {
+        const thumbItem = new Thumb();
+              thumbItem.init(
+                this.refs.$thumbsContainer,
+                i,
+                this.settings.imagesFolderURL+this.settings.thumbsFolderURL+item[0],
+                this.thumbsClickListener
+              );
+        this.refs.thumbsRep.push(thumbItem);
 
       const pictureItem = new Picture();
             pictureItem.init(
