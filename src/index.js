@@ -388,6 +388,9 @@ const App = function () {
     // });
 
     this.refs.$picturesContainer = document.querySelector('.pictures');
+    this.refs.$picturesContainer.addEventListener('click', this.setPictureNext);
+    this.refs.$picturesContainer.addEventListener('touchstart', this.setPictureNext);
+
     this.refs.$thumbsContainer = document.querySelector('.thumbs');
     this.refs.$thumbsButton = document.querySelector('.thumbs-button');
     this.refs.$thumbsButton.addEventListener('click', this.toggleThumbs);

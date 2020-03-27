@@ -386,10 +386,15 @@ body {
 
 .thumbs {
   z-index: 2;
+  pointer-events: none;
 
   .is-loading & {
     animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
     animation-delay: 0.2s;
+  }
+
+  .thumbs-displayed & {
+    pointer-events: auto;
   }
 }
 
