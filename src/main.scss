@@ -447,12 +447,12 @@ body {
 
 .pictures {
   z-index: 0;
-  pointer-events: none;
 }
 
 .picture {
   $root: #{&};
 
+  cursor: pointer;
   display: none;
   position: absolute;
   overflow: hidden;
