@@ -348,7 +348,6 @@ const App = function () {
     timeoutDisplayNextPicture: undefined,
     timeoutHidePrevPicture: undefined,
     timeoutCloseThumbs: undefined,
-    // timeoutWheelDebounce: undefined,
   };
 
   this.init = () => {
@@ -378,14 +377,6 @@ const App = function () {
     this.updatePagination();
 
     window.addEventListener('keydown', this.navigateKeyboard, false);
-    // window.addEventListener('wheel', (e) => {
-    //   if (this.refs.timeoutWheelDebounce) {
-    //     clearTimeout(this.refs.timeoutWheelDebounce);
-    //   }
-    //   this.refs.timeoutWheelDebounce = setTimeout(()=> {
-    //     this.navigateWheel(e.deltaY);
-    //   }, 100);
-    // });
 
     this.refs.$picturesContainer = document.querySelector('.pictures');
     this.refs.$picturesContainer.addEventListener('click', this.setPictureNext);
@@ -665,17 +656,6 @@ const App = function () {
       }
     }, this.settings.picturesMaskAnimationDuration + additionalDelayWhenCalledFromThumb);
   }
-
-  // this.navigateWheel = (delta) => {
-  //   if (document.body.classList.contains('is-loading') == false) {
-  //     if (delta > 0) {
-  //       this.setPictureNext();
-  //     } else {
-  //       this.setPicturePrev();
-  //     }
-  //     return false;
-  //   }
-  // };
 
   this.resize = () => {
     const windowPadding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
