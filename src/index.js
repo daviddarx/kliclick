@@ -409,6 +409,7 @@ const App = function () {
                 this.thumbsClickListener
               );
         this.refs.thumbsRep.push(thumbItem);
+      }
 
       const pictureItem = new Picture();
             pictureItem.init(
