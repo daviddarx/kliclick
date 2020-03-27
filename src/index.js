@@ -3,6 +3,139 @@ import * as content from '../content/pictures.json'
 delete content.default;
 const contentArray = Object.values(content);
 
+
+
+
+//thumbs
+const Thumb = function () {
+  this.id = 0;
+  this.imgURL = '';
+
+  this.settings = {
+    x: 0,
+    y: 0,
+    posX: 0,
+    posY: 0,
+    posXRandom: 0,
+    posYRandom: 0,
+    scale: 0,
+    width: 0,
+    height: 0,
+    widthInit: 0,
+    heightInit: 0,
+    availableScale: 0.9,
+    randomScaleMin: 0.2,
+    randomScaleMax: 2,
+    randomPositionMax: 0.1,
+    scaleMax: 0.8,
+  };
+
+  this.refs = {
+    $parent: undefined,
+    $container: undefined,
+    $image: undefined,
+    clickCallback: undefined,
+    loadCompleteCallback: undefined,
+  };
+
+  this.isLoaded = false;
+
+  this.init = (parent, id, imgURL, clickCallback) => {
+    this.refs.$parent = parent;
+    this.id = id;
+    this.imgURL = imgURL;
+    this.refs.clickCallback = clickCallback;
+
+    this.refs.$container = document.createElement('div');
+    this.refs.$container.classList.add('thumb');
+    this.refs.$parent.appendChild(this.refs.$container);
+  };
+
+  this.load = (loadCompleteCallback) => {
+    this.refs.loadCompleteCallback = loadCompleteCallback;
+    this.createImage();
+  };
+
+  this.createImage = () => {
+    this.refs.$image = document.createElement('img');
+    this.refs.$image.setAttribute('src',  this.imgURL);
+    this.refs.$image.classList.add('thumb__img');
+    this.refs.$image.addEventListener('load', this.imageLoadComplete);
+    this.refs.$container.appendChild(this.refs.$image);
+
+    this.refs.$container.addEventListener('click', this.click);
+    this.refs.$container.addEventListener('touchstart', this.click);
+  };
+
+  this.imageLoadComplete = () => {
+    this.settings.widthInit = this.refs.$image.width;
+    this.settings.heightInit = this.refs.$image.height;
+
+    this.refs.loadCompleteCallback();
+    this.refs.loadCompleteCallback = undefined;
+  };
+
+  this.click = () => {
+    this.refs.clickCallback(this.id);
+  };
+
+  this.setPosition = (x, y) => {
+    this.settings.x = x;
+    this.settings.y = y;
+
+    const randomPositionMaxX = windowW * this.settings.randomPositionMax;
+    const randomPositionMaxY = windowH * this.settings.randomPositionMax;
+
+    if (this.settings.x != 0 ) {
+      this.settings.posXRandom = Math.random() * randomPositionMaxX * 2 - randomPositionMaxX;
+    } else {
+      this.settings.posXRandom = Math.random() * randomPositionMaxX;
+    }
+
+    if (this.settings.y != 0 ) {
+      this.settings.posYRandom = Math.random() * randomPositionMaxY * 2 - randomPositionMaxY;
+    } else {
+      this.settings.posYRandom = Math.random() * randomPositionMaxY;
+    }
+  }
+
+  this.setSize = (width, height) => {
+    const availableWidth = width * this.settings.availableScale;
+    const availableBHeight = height * this.settings.availableScale;
+
+    this.settings.width = availableWidth;
+    this.settings.scale = availableWidth / this.settings.widthInit;
+    this.settings.height = this.settings.scale * this.settings.heightInit;
+
+    if (this.settings.height > availableBHeight) {
+      this.settings.height = availableBHeight;
+      this.settings.scale = availableBHeight / this.settings.heightInit;
+      this.settings.width = this.settings.scale * this.settings.widthInit;
+    }
+
+    this.settings.scale = this.settings.randomScaleMin + this.settings.scale * Math.random(this.settings.randomScaleMax);
+
+    if (this.settings.scale > this.settings.scaleMax) {
+      this.settings.scale = this.settings.scaleMax;
+    }
+    this.refs.$container.style.setProperty('--s-scale', this.settings.scale);
+  }
+
+  this.place = () => {
+    this.refs.$container.style.left = this.settings.x + this.settings.posX + this.settings.posXRandom + 'px';
+    this.refs.$container.style.top = this.settings.y + this.settings.posY + this.settings.posYRandom + 'px';
+
+    if (this.isLoaded == false) {
+      this.refs.$container.classList.add('loaded');
+      this.isLoaded = true;
+    }
+  };
+}
+
+
+
+
+
 // pictures
 const Picture = function () {
   this.id = 0;
@@ -156,136 +289,6 @@ const Picture = function () {
     }
   };
 };
-
-
-
-
-
-//thumbs
-const Thumb = function () {
-  this.id = 0;
-  this.imgURL = '';
-
-  this.settings = {
-    x: 0,
-    y: 0,
-    posX: 0,
-    posY: 0,
-    posXRandom: 0,
-    posYRandom: 0,
-    scale: 0,
-    width: 0,
-    height: 0,
-    widthInit: 0,
-    heightInit: 0,
-    availableScale: 0.9,
-    randomScaleMin: 0.2,
-    randomScaleMax: 2,
-    randomPositionMax: 0.1,
-    scaleMax: 0.8,
-  };
-
-  this.refs = {
-    $parent: undefined,
-    $container: undefined,
-    $image: undefined,
-    clickCallback: undefined,
-    loadCompleteCallback: undefined,
-  };
-
-  this.isLoaded = false;
-
-  this.init = (parent, id, imgURL, clickCallback) => {
-    this.refs.$parent = parent;
-    this.id = id;
-    this.imgURL = imgURL;
-    this.refs.clickCallback = clickCallback;
-
-    this.refs.$container = document.createElement('div');
-    this.refs.$container.classList.add('thumb');
-    this.refs.$parent.appendChild(this.refs.$container);
-  };
-
-  this.load = (loadCompleteCallback) => {
-    this.refs.loadCompleteCallback = loadCompleteCallback;
-    this.createImage();
-  };
-
-  this.createImage = () => {
-    this.refs.$image = document.createElement('img');
-    this.refs.$image.setAttribute('src',  this.imgURL);
-    this.refs.$image.classList.add('thumb__img');
-    this.refs.$image.addEventListener('load', this.imageLoadComplete);
-    this.refs.$container.appendChild(this.refs.$image);
-
-    this.refs.$container.addEventListener('click', this.click);
-    this.refs.$container.addEventListener('touchstart', this.click);
-  };
-
-  this.imageLoadComplete = () => {
-    this.settings.widthInit = this.refs.$image.width;
-    this.settings.heightInit = this.refs.$image.height;
-
-    this.refs.loadCompleteCallback();
-    this.refs.loadCompleteCallback = undefined;
-  };
-
-  this.click = () => {
-    this.refs.clickCallback(this.id);
-  };
-
-  this.setPosition = (x, y) => {
-    this.settings.x = x;
-    this.settings.y = y;
-
-    const randomPositionMaxX = windowW * this.settings.randomPositionMax;
-    const randomPositionMaxY = windowH * this.settings.randomPositionMax;
-
-    if (this.settings.x != 0 ) {
-      this.settings.posXRandom = Math.random() * randomPositionMaxX * 2 - randomPositionMaxX;
-    } else {
-      this.settings.posXRandom = Math.random() * randomPositionMaxX;
-    }
-
-    if (this.settings.y != 0 ) {
-      this.settings.posYRandom = Math.random() * randomPositionMaxY * 2 - randomPositionMaxY;
-    } else {
-      this.settings.posYRandom = Math.random() * randomPositionMaxY;
-    }
-  }
-
-  this.setSize = (width, height) => {
-    const availableWidth = width * this.settings.availableScale;
-    const availableBHeight = height * this.settings.availableScale;
-
-    this.settings.width = availableWidth;
-    this.settings.scale = availableWidth / this.settings.widthInit;
-    this.settings.height = this.settings.scale * this.settings.heightInit;
-
-    if (this.settings.height > availableBHeight) {
-      this.settings.height = availableBHeight;
-      this.settings.scale = availableBHeight / this.settings.heightInit;
-      this.settings.width = this.settings.scale * this.settings.widthInit;
-    }
-
-    this.settings.scale = this.settings.randomScaleMin + this.settings.scale * Math.random(this.settings.randomScaleMax);
-
-    if (this.settings.scale > this.settings.scaleMax) {
-      this.settings.scale = this.settings.scaleMax;
-    }
-    this.refs.$container.style.setProperty('--s-scale', this.settings.scale);
-  }
-
-  this.place = () => {
-    this.refs.$container.style.left = this.settings.x + this.settings.posX + this.settings.posXRandom + 'px';
-    this.refs.$container.style.top = this.settings.y + this.settings.posY + this.settings.posYRandom + 'px';
-
-    if (this.isLoaded == false) {
-      this.refs.$container.classList.add('loaded');
-      this.isLoaded = true;
-    }
-  };
-}
 
 
 
