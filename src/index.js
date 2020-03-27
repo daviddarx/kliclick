@@ -396,6 +396,7 @@ const App = function () {
 
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
     this.refs.picturesRep[0].load();
+    this.refs.picturesRep[this.refs.picturesRep.length - 1].load();
   };
 
   this.thumbsLoadCompleteListener = () => {
