@@ -197,7 +197,10 @@ const Picture = function () {
   this.load = (loadCompleteCallback, preloadCallback) => {
     this.refs.loadCompleteCallback = loadCompleteCallback;
     this.refs.preloadCallback = preloadCallback;
-    this.createImage();
+
+    if (this.refs.$image == undefined) {
+      this.createImage();
+    }
   };
 
   this.createImage = () => {
@@ -315,6 +318,7 @@ const App = function () {
     imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
     areThumbsDisplayed: true,
+    pictureDisplayedFromThumb: false,
     picturesMaskAnimationDuration: 0,
     thumbsMaskAnimationDuration: 0
   };
@@ -484,11 +488,18 @@ const App = function () {
   };
 
   this.thumbsClickListener = (id) => {
+    this.settings.pictureDisplayedFromThumb = true;
     this.displayImage(id);
   };
 
   this.displayImage = (id) => {
     this.settings.currentID = id;
+
+    if (this.refs.previousPicture) {
+      this.refs.previousPicture.removeFromTop();
+      this.refs.previousPicture.remove();
+    }
+
     this.refs.previousPicture = this.refs.currentPicture;
     this.refs.currentPicture = this.refs.picturesRep[this.settings.currentID];
 
@@ -593,16 +604,18 @@ const App = function () {
   this.navigateKeyboard = (e) => {
     const key = e.keyCode ? e.keyCode : e.which;
 
-    if (key == 38) {
-      this.setPicturePrev();
-    } else if (key == 40) {
-      this.setPictureNext();
-    } else if (key == 66) {
-      this.toggleLightmode();
-    }
+    if (document.body.classList.contains('is-loading') == false) {
+      if (key == 38) {
+        this.setPicturePrev();
+      } else if (key == 40) {
+        this.setPictureNext();
+      } else if (key == 66) {
+        this.toggleLightmode();
+      }
 
-    if (key == 38 || key == 40 | key == 66) {
-      e.preventDefault();
+      if (key == 38 || key == 40 | key == 66) {
+        e.preventDefault();
+      }
     }
   }
 
@@ -631,23 +644,30 @@ const App = function () {
       clearTimeout(this.refs.timeoutChangeLightmode);
     }
 
+    let additionalDelayWhenCalledFromThumb = 0;
+    if (this.settings.pictureDisplayedFromThumb == true) {
+      this.settings.pictureDisplayedFromThumb = false;
+      additionalDelayWhenCalledFromThumb = this.settings.thumbsMaskAnimationDuration;
+    }
+
     this.refs.timeoutChangeLightmode = setTimeout( () => {
       if (isLight == 0) {
         document.body.classList.add('is-inverted');
       }else {
         document.body.classList.remove('is-inverted');
       }
-    }, this.settings.picturesMaskAnimationDuration);
+    }, this.settings.picturesMaskAnimationDuration + additionalDelayWhenCalledFromThumb);
   }
 
   // this.navigateWheel = (delta) => {
-  //   if (delta > 0) {
-  //     this.setPictureNext();
-  //   } else {
-  //     this.setPicturePrev();
+  //   if (document.body.classList.contains('is-loading') == false) {
+  //     if (delta > 0) {
+  //       this.setPictureNext();
+  //     } else {
+  //       this.setPicturePrev();
+  //     }
+  //     return false;
   //   }
-
-  //   return false;
   // };
 
   this.resize = () => {

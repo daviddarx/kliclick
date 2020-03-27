@@ -98,7 +98,7 @@ body {
   z-index: 5000;
   top: 50%;
   left: 50%;
-  transition: opacity linear 0.2s;
+  transition: opacity linear 0.1s;
 
   &::before,
   &::after {
@@ -140,6 +140,11 @@ body {
 
   .thumbs-displayed & {
     mix-blend-mode: overlay;
+  }
+
+  .thumbs-displayed.is-loaded & {
+    opacity: 1;
+    transition-delay: calc(var(--d-pictures-mask) + 10s * var(--d-pictures-mask-delay));
   }
 
   .thumbs-displayed.is-inverted & {
@@ -232,6 +237,10 @@ body {
   height: var(--s-navigation-height);
   margin-top: var(--s-navigation-spacing);
 
+  .is-loading & {
+    pointer-events: none;
+  }
+
   &::before,
   &::after {
     content: "";
@@ -294,6 +303,10 @@ body {
   height: var(--s-buttons);
   opacity: 0;
   transition: opacity ease-out var(--d-opacity-computed);
+
+  .is-loading & {
+    pointer-events: none;
+  }
 
   .is-computed & {
     opacity: 1;
@@ -377,7 +390,6 @@ body {
   .is-loading & {
     animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
     animation-delay: 0.2s;
-    overflow: auto;
   }
 }
 
@@ -392,6 +404,10 @@ body {
   visibility: hidden;
   transform: scale(var(--s-scale));
   transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-thumbs-mask);
+
+  .is-loading & {
+    pointer-events: none;
+  }
 
   &::after {
     content: "";
@@ -441,6 +457,7 @@ body {
   position: absolute;
   overflow: hidden;
   z-index: 0;
+  transition: visibility linear 0s;
 
   &.is-active {
     display: block;
@@ -448,6 +465,13 @@ body {
 
   &.is-on-top {
     z-index: 1;
+  }
+
+  &.is-displayed {
+    .thumbs-displayed & {
+      visibility: hidden;
+      transition-delay: calc(var(--d-pictures-mask) + 10s * var(--d-pictures-mask-delay));
+    }
   }
 
   &__img {
