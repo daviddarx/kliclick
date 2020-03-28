@@ -385,9 +385,6 @@ body {
 }
 
 .thumbs {
-  z-index: 2;
-  pointer-events: none;
-
   .is-loading & {
     animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
     animation-delay: 0.2s;
@@ -452,6 +449,11 @@ body {
 
 .pictures {
   z-index: 0;
+
+  .thumbs-displayed & {
+    z-index: -1;
+    pointer-events: none;
+  }
 }
 
 .picture {
