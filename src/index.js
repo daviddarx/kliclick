@@ -1,4 +1,9 @@
+import browserDetection from './browser-detect.js';
 import * as content from '../content/pictures.json';
+
+if (browserDetection.isSafari) {
+  document.body.classList.add('no-blend-mode');
+}
 
 delete content.default;
 const contentArray = Object.values(content);

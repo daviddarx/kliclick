@@ -151,6 +151,10 @@ body {
     mix-blend-mode: difference;
   }
 
+  .thumbs-displayed.no-blend-mode & {
+    mix-blend-mode: initial;
+  }
+
   &__img {
     fill: var(--c-interaction);
     width: auto;
