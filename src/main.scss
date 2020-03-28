@@ -210,7 +210,7 @@ body {
   font-size: var(--s-buttons);
   width: 5em;
   text-align: right;
-  transform: rotate(90deg) translate(calc(-100% - 32px), -90%);
+  transform: rotate(90deg) translate(calc(-100% - 32px), -100%);
   transform-origin: top left;
   opacity: 0;
   transition: opacity ease-out var(--d-opacity-computed);
