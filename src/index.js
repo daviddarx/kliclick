@@ -1,4 +1,4 @@
-import * as content from '../content/pictures.json'
+import * as content from '../content/pictures.json';
 
 delete content.default;
 const contentArray = Object.values(content);
@@ -97,7 +97,7 @@ const Thumb = function () {
     } else {
       this.settings.posYRandom = Math.random() * randomPositionMaxY;
     }
-  }
+  };
 
   this.setSize = (width, height) => {
     const availableWidth = width * this.settings.availableScale;
@@ -119,7 +119,7 @@ const Thumb = function () {
       this.settings.scale = this.settings.scaleMax;
     }
     this.refs.$container.style.setProperty('--s-scale', this.settings.scale);
-  }
+  };
 
   this.place = () => {
     this.refs.$container.style.left = this.settings.x + this.settings.posX + this.settings.posXRandom + 'px';
@@ -130,7 +130,7 @@ const Thumb = function () {
       this.isLoaded = true;
     }
   };
-}
+};
 
 
 
@@ -211,7 +211,7 @@ const Picture = function () {
     this.refs.$container.appendChild(this.refs.$image);
 
     requestAnimationFrame(this.imagePreload);
-  }
+  };
 
   this.imagePreload = () => {
     if (this.refs.preloadCallback) {
@@ -248,7 +248,7 @@ const Picture = function () {
 
     this.clearDisplayTimeout();
     this.refs.displayTimeout = setTimeout(this.displayTimeoutListener, 100);
-  }
+  };
 
   this.displayTimeoutListener = () => {
     this.refs.$container.classList.add('is-displayed');
@@ -259,7 +259,7 @@ const Picture = function () {
       clearTimeout(this.refs.displayTimeout);
       this.refs.displayTimeout = undefined;
     }
-  }
+  };
 
   this.removeFromTop = () => {
     this.refs.$container.classList.remove('is-on-top');
@@ -279,7 +279,7 @@ const Picture = function () {
     this.settings.windowPadding = windowPadding;
     this.settings.windowWMax = Math.floor(windowW - 2 * windowPadding);
     this.settings.windowHMax = Math.floor(windowH - 2 * windowPadding);
-  }
+  };
 
   this.resize = () => {
     if (this.isLoaded == true) {
@@ -563,7 +563,7 @@ const App = function () {
   };
 
   this.launchImageHiding = () => {
-    this.refs.previousPicture.hide(this.settings.picturesMaskAnimationDuration)
+    this.refs.previousPicture.hide(this.settings.picturesMaskAnimationDuration);
   };
 
   this.launchImageDisplaying = () => {
@@ -614,15 +614,15 @@ const App = function () {
         this.setPicturePrev();
       } else if (key == 40) {
         this.setPictureNext();
-      } else if (key == 66) {
+      } else if (key == 32) {
         this.toggleLightmode();
       }
 
-      if (key == 38 || key == 40 | key == 66) {
+      if (key == 38 || key == 40 || key == 32) {
         e.preventDefault();
       }
     }
-  }
+  };
 
   this.navigateHistory = (e) => {
     if (e.state != null) {
@@ -640,7 +640,7 @@ const App = function () {
       this.settings.displayingImageThrougthHistory = true;
       this.displayImage(this.settings.currentID);
     }
-  }
+  };
 
   this.updatePagination = () => {
     let zero = '';
@@ -664,7 +664,7 @@ const App = function () {
         this.settings.displayingImageThrougthHistory = false;
       }
     }
-  }
+  };
 
   this.toggleLightmode = () => {
     if (this.refs.timeoutChangeLightmode != undefined) {
@@ -691,7 +691,7 @@ const App = function () {
         document.body.classList.remove('is-inverted');
       }
     }, this.settings.picturesMaskAnimationDuration + additionalDelayWhenCalledFromThumb);
-  }
+  };
 
   this.resize = () => {
     const windowPadding = Math.floor(windowW * this.settings.windowPaddingRatioToW);
@@ -718,7 +718,7 @@ const App = function () {
   };
 };
 
-let app = undefined;
+let app;
 
 
 
