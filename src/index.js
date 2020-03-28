@@ -321,7 +321,9 @@ const App = function () {
     areThumbsDisplayed: true,
     pictureDisplayedFromThumb: false,
     picturesMaskAnimationDuration: 0,
-    thumbsMaskAnimationDuration: 0
+    thumbsMaskAnimationDuration: 0,
+    documentTitle: undefined,
+    displayingImageThrougthHistory: false
   };
 
   this.refs = {
@@ -351,6 +353,8 @@ const App = function () {
   };
 
   this.init = () => {
+    this.settings.documentTitle = document.title;
+
     const bodyStyle = getComputedStyle(document.body);
     this.settings.thumbsMaskAnimationDuration = parseFloat(bodyStyle.getPropertyValue('--d-thumbs-mask').split('s')[0]) * 1000;
     this.settings.picturesMaskAnimationDuration = (parseFloat(bodyStyle.getPropertyValue('--d-pictures-mask').split('s')[0]) + 10 * parseFloat(bodyStyle.getPropertyValue('--d-pictures-mask-delay'))) * 1000;
@@ -377,6 +381,7 @@ const App = function () {
     this.updatePagination();
 
     window.addEventListener('keydown', this.navigateKeyboard, false);
+    window.addEventListener('popstate', this.navigateHistory);
 
     this.refs.$picturesContainer = document.querySelector('.pictures');
     this.refs.$picturesContainer.addEventListener('click', this.setPictureNext);
@@ -418,6 +423,8 @@ const App = function () {
     this.refs.thumbsRep[0].load(this.thumbsLoadCompleteListener);
     this.refs.picturesRep[0].load();
     this.refs.picturesRep[this.refs.picturesRep.length - 1].load();
+
+    this.checkForPathNameURL();
   };
 
   this.thumbsLoadCompleteListener = () => {
@@ -617,6 +624,24 @@ const App = function () {
     }
   }
 
+  this.navigateHistory = (e) => {
+    if (e.state != null) {
+      this.settings.currentID = this.settings.totalPictures  - e.state.id;
+      this.settings.displayingImageThrougthHistory = true;
+      this.displayImage(this.settings.currentID);
+    } else {
+      this.toggleThumbs();
+    }
+  };
+
+  this.checkForPathNameURL = () => {
+    if (window.location.pathname.split('/')[1] != '') {
+      this.settings.currentID = this.settings.totalPictures - parseInt(window.location.pathname.split('/')[1]);
+      this.settings.displayingImageThrougthHistory = true;
+      this.displayImage(this.settings.currentID);
+    }
+  }
+
   this.updatePagination = () => {
     let zero = '';
     let current = (this.settings.currentID == undefined) ? 0 : this.settings.totalPictures - this.settings.currentID;
@@ -628,6 +653,17 @@ const App = function () {
     }
 
     this.refs.$paginationCurrent.innerHTML = zero + current;
+
+    if (window.history.pushState) {
+      if (this.settings.displayingImageThrougthHistory == false) {
+        if(current != 0) {
+          let historyTitle = this.settings.documentTitle + " – " + zero + current;
+          window.history.pushState({id: current}, historyTitle, '/' + current);
+        }
+      } else {
+        this.settings.displayingImageThrougthHistory = false;
+      }
+    }
   }
 
   this.toggleLightmode = () => {
