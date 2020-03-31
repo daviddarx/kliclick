@@ -28,11 +28,10 @@ const Thumb = function () {
     height: 0,
     widthInit: 0,
     heightInit: 0,
-    availableScale: 0.9,
     randomScaleMin: 0.2,
-    randomScaleMax: 2,
+    randomScaleMax: 0.9,
     randomPositionMax: 0.1,
-    scaleMax: 0.8,
+    scaleMax: 1,
   };
 
   this.refs = {
@@ -103,31 +102,39 @@ const Thumb = function () {
     }
   };
 
-  this.setSize = (width, height) => {
-    const availableWidth = width * this.settings.availableScale;
-    const availableBHeight = height * this.settings.availableScale;
-
+  this.setSize = (availableWidth, availableHeight) => {
     this.settings.width = availableWidth;
     this.settings.scale = availableWidth / this.settings.widthInit;
     this.settings.height = this.settings.scale * this.settings.heightInit;
 
-    if (this.settings.height > availableBHeight) {
-      this.settings.height = availableBHeight;
-      this.settings.scale = availableBHeight / this.settings.heightInit;
+    if (this.settings.height > availableHeight) {
+      this.settings.height = availableHeight;
+      this.settings.scale = availableHeight / this.settings.heightInit;
       this.settings.width = this.settings.scale * this.settings.widthInit;
     }
-
-    this.settings.scale = this.settings.randomScaleMin + this.settings.scale * Math.random(this.settings.randomScaleMax);
 
     if (this.settings.scale > this.settings.scaleMax) {
       this.settings.scale = this.settings.scaleMax;
     }
-    this.refs.$container.style.setProperty('--s-scale', this.settings.scale);
+
+    const finalWidth = Math.round(this.settings.scale * this.settings.widthInit);
+    const finalHeight = Math.round(this.settings.scale * this.settings.heightInit);
+
+    this.settings.posX = (availableWidth - finalWidth) * 0.5;
+    this.settings.posY = (availableHeight - finalHeight) * 0.5;
+
+    const scaleHover = this.settings.widthInit / finalWidth;
+    const scale = Math.random() * (this.settings.randomScaleMax - this.settings.randomScaleMin) + this.settings.randomScaleMin;
+
+    this.refs.$container.style.setProperty('--s-scale-hover', scaleHover);
+    this.refs.$container.style.setProperty('--s-scale', scale);
+    this.refs.$container.style.width = finalWidth + 'px';
+    this.refs.$container.style.height = finalHeight + 'px';
   };
 
   this.place = () => {
-    this.refs.$container.style.left = this.settings.x + this.settings.posX + this.settings.posXRandom + 'px';
-    this.refs.$container.style.top = this.settings.y + this.settings.posY + this.settings.posYRandom + 'px';
+    this.refs.$container.style.left = Math.round(this.settings.x + this.settings.posX + this.settings.posXRandom) + 'px';
+    this.refs.$container.style.top = Math.round(this.settings.y + this.settings.posY + this.settings.posYRandom) + 'px';
 
     if (this.isLoaded == false) {
       this.refs.$container.classList.add('loaded');

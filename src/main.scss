@@ -493,10 +493,11 @@ body {
 
   cursor: pointer;
   position: absolute;
-  display: inline-block;
+  display: block;
   visibility: hidden;
   transform: scale(var(--s-scale));
   transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-thumbs-mask);
+  background-color: var(--c-background);
 
   .is-loading & {
     pointer-events: none;
@@ -537,6 +538,8 @@ body {
 
   &__img {
     display: block;
+    width: 100%;
+    height: auto;
   }
 }
 
