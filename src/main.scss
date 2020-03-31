@@ -454,10 +454,12 @@ body {
 
 .pictures {
   z-index: 0;
+  transition: z-index linear 0s 0.5s;
 
   .thumbs-displayed & {
     z-index: -1;
     pointer-events: none;
+    transition-delay: 0s;
   }
 }
 
