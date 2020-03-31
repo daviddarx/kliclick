@@ -197,9 +197,11 @@ body {
     transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
   }
 
-  &:hover {
-    &::before {
-      width: var(--s-buttons);
+  @media not all and (hover: none) {
+    &:hover {
+      &::before {
+        width: var(--s-buttons);
+      }
     }
   }
 }
@@ -257,24 +259,32 @@ body {
     left: 0;
     background-color: var(--c-interaction);
     transform-origin: top right;
-    transform: rotate(0deg);
+    transform: rotate(calc(var(--r-arrow) * -1));
     transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
   }
 
   &::after {
     left: 50%;
+    transform: rotate(var(--r-arrow));
     transform-origin: bottom left;
     margin-left: 1px;
   }
 
-  &:hover {
+  @media not all and (hover: none) {
     &::before,
     &::after {
-      transform: rotate(calc(var(--r-arrow) * -1));
+      transform: rotate(0deg);
     }
 
-    &::after {
-      transform: rotate(var(--r-arrow));
+    &:hover {
+      &::before,
+      &::after {
+        transform: rotate(calc(var(--r-arrow) * -1));
+      }
+
+      &::after {
+        transform: rotate(var(--r-arrow));
+      }
     }
   }
 
@@ -330,7 +340,7 @@ body {
     left: 0;
     background-color: var(--c-interaction);
     transform-origin: center center;
-    transition: transform var(--e-inout) 0.2s, background-color ease-out var(--d-interaction);
+    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
   }
 
   &::after {
@@ -348,19 +358,21 @@ body {
     }
   }
 
-  &:hover {
-    &::after,
-    &::before {
-      transform: translateX(calc(var(--s-translate-hover) * -1));
-    }
-
-    .thumbs-displayed & {
-      &::after {
-        transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-hover));
+  @media not all and (hover: none) {
+    &:hover {
+      &::after,
+      &::before {
+        transform: translateX(calc(var(--s-translate-hover) * -1));
       }
 
-      &::before {
-        transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-hover));
+      .thumbs-displayed & {
+        &::after {
+          transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-hover));
+        }
+
+        &::before {
+          transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-hover));
+        }
       }
     }
   }
@@ -369,8 +381,10 @@ body {
     top: 50%;
     margin-top: -1px;
 
-    :hover > & {
-      transform: translateX(var(--s-translate-hover));
+    @media not all and (hover: none) {
+      :hover > & {
+        transform: translateX(var(--s-translate-hover));
+      }
     }
 
     .thumbs-displayed & {
@@ -439,11 +453,13 @@ body {
     }
   }
 
-  &:hover {
-    transform: scale(var(--s-scale-hover));
+  @media not all and (hover: none) {
+    &:hover {
+      transform: scale(var(--s-scale-hover));
 
-    .thumbs-displayed & {
-      z-index: 6000;
+      .thumbs-displayed & {
+        z-index: 6000;
+      }
     }
   }
 
