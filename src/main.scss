@@ -43,6 +43,7 @@
 
 html {
   --s-buttons: 24px;
+  --s-button-interaction-margin: -10px;
   --s-navigation-height: 48px;
   --s-navigation-spacing: 4px;
   --s-twerk: 1px;
@@ -170,37 +171,59 @@ body {
 }
 
 .lightmode-button {
+  --s-size: calc(var(--s-buttons) + 4px);
+
+  $root: #{&};
+
   cursor: pointer;
   position: fixed;
   z-index: 10000;
-  overflow: hidden;
-  width: var(--s-buttons);
-  height: var(--s-buttons);
-  border-radius: 100%;
-  border: 2px solid var(--c-interaction);
-  transition: border-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
-  opacity: 0;
-
-  .is-computed & {
-    opacity: 1;
-  }
+  width: var(--s-size);
+  height: var(--s-size);
 
   &::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
     display: block;
-    width: calc(var(--s-buttons) * 0.5);
-    height: var(--s-buttons);
-    background-color: var(--c-interaction);
-    transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
+    top: var(--s-button-interaction-margin);
+    right: var(--s-button-interaction-margin);
+    bottom: var(--s-button-interaction-margin);
+    left: var(--s-button-interaction-margin);
   }
 
-  @media not all and (hover: none) {
-    &:hover {
-      &::before {
-        width: var(--s-buttons);
+  &__circle {
+    display: block;
+    position: absolute;
+    overflow: hidden;
+    width: var(--s-size);
+    height: var(--s-size);
+    border-radius: 100%;
+    border: 2px solid var(--c-interaction);
+    box-sizing: border-box;
+    transition: border-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
+    opacity: 0;
+
+    .is-computed & {
+      opacity: 1;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: calc(var(--s-buttons) * 0.5);
+      height: var(--s-size);
+      background-color: var(--c-interaction);
+      transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
+    }
+
+    @media not all and (hover: none) {
+      #{$root}:hover & {
+        &::before {
+          width: var(--s-size);
+        }
       }
     }
   }
@@ -237,6 +260,8 @@ body {
 .navigation-button {
   --r-arrow: 45deg;
 
+  $root: #{&};
+
   cursor: pointer;
   display: block;
   position: relative;
@@ -244,52 +269,69 @@ body {
   height: var(--s-navigation-height);
   margin-top: var(--s-navigation-spacing);
 
+  &::before {
+    content: "";
+    position: absolute;
+    display: block;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
+  }
+
   .is-loading & {
     pointer-events: none;
   }
 
-  &::before,
-  &::after {
-    content: "";
+  &__arrow {
     display: block;
     position: absolute;
-    width: 50%;
-    height: 2px;
-    top: 0;
-    left: 0;
-    background-color: var(--c-interaction);
-    transform-origin: top right;
-    transform: rotate(calc(var(--r-arrow) * -1));
-    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
-  }
+    width: var(--s-buttons);
+    height: var(--s-navigation-height);
 
-  &::after {
-    left: 50%;
-    transform: rotate(var(--r-arrow));
-    transform-origin: bottom left;
-    margin-left: 1px;
-  }
-
-  @media not all and (hover: none) {
     &::before,
     &::after {
-      transform: rotate(0deg);
+      content: "";
+      display: block;
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      top: 0;
+      left: 0;
+      background-color: var(--c-interaction);
+      transform-origin: top right;
+      transform: rotate(calc(var(--r-arrow) * -1));
+      transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
     }
 
-    &:hover {
+    &::after {
+      left: 50%;
+      transform: rotate(var(--r-arrow));
+      transform-origin: bottom left;
+      margin-left: 1px;
+    }
+
+    @media not all and (hover: none) {
       &::before,
       &::after {
-        transform: rotate(calc(var(--r-arrow) * -1));
+        transform: rotate(0deg);
       }
 
-      &::after {
-        transform: rotate(var(--r-arrow));
+      #{$root}:hover & {
+        &::before,
+        &::after {
+          transform: rotate(calc(var(--r-arrow) * -1));
+        }
+
+        &::after {
+          transform: rotate(var(--r-arrow));
+        }
       }
     }
-  }
 
-  &--next {
-    transform: scaleY(-1);
+    &--next {
+      transform: scaleY(-1);
+    }
   }
 
   &__line {
@@ -316,19 +358,83 @@ body {
   z-index: 10000;
   width: var(--s-buttons);
   height: var(--s-buttons);
-  opacity: 0;
-  transition: opacity ease-out var(--d-opacity-computed);
+
+  &::before {
+    content: "";
+    position: absolute;
+    display: block;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
+  }
 
   .is-loading & {
     pointer-events: none;
   }
 
-  .is-computed & {
-    opacity: 1;
+  &__burger {
+    display: block;
+    position: absolute;
+    width: var(--s-buttons);
+    height: var(--s-buttons);
+    opacity: 0;
+    transition: opacity ease-out var(--d-opacity-computed);
+
+    .is-computed & {
+      opacity: 1;
+    }
+
+    &::before,
+    &::after {
+      pointer-events: none;
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      top: 0;
+      left: 0;
+      background-color: var(--c-interaction);
+      transform-origin: center center;
+      transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
+    }
+
+    &::after {
+      top: auto;
+      bottom: 0;
+
+      .thumbs-displayed & {
+        transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-thumbs-displayed));
+      }
+    }
+
+    &::before {
+      .thumbs-displayed & {
+        transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-thumbs-displayed));
+      }
+    }
+
+    @media not all and (hover: none) {
+      #{$root}:hover & {
+        &::after,
+        &::before {
+          transform: translateX(calc(var(--s-translate-hover) * -1));
+        }
+
+        .thumbs-displayed & {
+          &::after {
+            transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-hover));
+          }
+
+          &::before {
+            transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-hover));
+          }
+        }
+      }
+    }
   }
 
-  &::before,
-  &::after,
   &__line::before {
     pointer-events: none;
     content: "";
@@ -336,54 +442,20 @@ body {
     position: absolute;
     width: 100%;
     height: 2px;
-    top: 0;
+    top: 50%;
     left: 0;
     background-color: var(--c-interaction);
     transform-origin: center center;
     transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
-  }
-
-  &::after {
-    top: auto;
-    bottom: 0;
-
-    .thumbs-displayed & {
-      transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-thumbs-displayed));
-    }
-  }
-
-  &::before {
-    .thumbs-displayed & {
-      transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-thumbs-displayed));
-    }
-  }
-
-  @media not all and (hover: none) {
-    &:hover {
-      &::after,
-      &::before {
-        transform: translateX(calc(var(--s-translate-hover) * -1));
-      }
-
-      .thumbs-displayed & {
-        &::after {
-          transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-hover));
-        }
-
-        &::before {
-          transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-hover));
-        }
-      }
-    }
-  }
-
-  &__line::before {
-    top: 50%;
     margin-top: -1px;
 
     @media not all and (hover: none) {
-      :hover > & {
+      #{$root}:hover & {
         transform: translateX(var(--s-translate-hover));
+
+        .thumbs-displayed & {
+          transform: translateX(0) scaleX(0);
+        }
       }
     }
 
