@@ -69,7 +69,6 @@ const Thumb = function () {
     this.refs.$container.appendChild(this.refs.$image);
 
     this.refs.$container.addEventListener('click', this.click);
-    this.refs.$container.addEventListener('touchstart', this.click);
   };
 
   this.imageLoadComplete = () => {
@@ -370,13 +369,10 @@ const App = function () {
     this.refs.$navPrev = document.querySelector('.navigation-button--prev');
     this.refs.$navNext = document.querySelector('.navigation-button--next');
     this.refs.$navPrev.addEventListener('click', this.navigateButton);
-    this.refs.$navPrev.addEventListener('touchstart', this.navigateButton);
     this.refs.$navNext.addEventListener('click', this.navigateButton);
-    this.refs.$navNext.addEventListener('touchstart', this.navigateButton);
 
     this.refs.$lightmodeButton = document.querySelector('.lightmode-button');
     this.refs.$lightmodeButton.addEventListener('click', this.toggleLightmode);
-    this.refs.$lightmodeButton.addEventListener('touchstart', this.toggleLightmode);
 
     this.settings.totalPictures = contentArray.length;
 
@@ -390,12 +386,10 @@ const App = function () {
 
     this.refs.$picturesContainer = document.querySelector('.pictures');
     this.refs.$picturesContainer.addEventListener('click', this.setPictureNext);
-    this.refs.$picturesContainer.addEventListener('touchstart', this.setPictureNext);
 
     this.refs.$thumbsContainer = document.querySelector('.thumbs');
     this.refs.$thumbsButton = document.querySelector('.thumbs-button');
     this.refs.$thumbsButton.addEventListener('click', this.toggleThumbs);
-    this.refs.$thumbsButton.addEventListener('touchstart', this.toggleThumbs);
 
     const imgHDFolder = (windowW * window.devicePixelRatio > 1600) ? this.settings.imagesHDFolderURL : '';
 
