@@ -28,9 +28,9 @@ const Thumb = function () {
     height: 0,
     widthInit: 0,
     heightInit: 0,
-    randomScaleMin: 0.2,
+    randomScaleMin: 0.5,
     randomScaleMax: 0.9,
-    randomPositionMax: 0.1,
+    randomPositionMax: 0.07,
     scaleMax: 1,
   };
 
