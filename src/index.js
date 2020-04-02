@@ -499,6 +499,11 @@ const App = function () {
 
   this.thumbsClickListener = (id) => {
     this.settings.pictureDisplayedFromThumb = true;
+
+    if (this.refs.currentPicture) {
+      this.refs.currentPicture.remove();
+    }
+
     this.displayImage(id);
   };
 
