@@ -8,10 +8,6 @@
   src: url('webfonts/3AB588_0_0.eot?#iefix') format('embedded-opentype'), url('webfonts/3AB588_0_0.woff2') format('woff2'), url('webfonts/3AB588_0_0.woff') format('woff'), url('webfonts/3AB588_0_0.ttf') format('truetype');
 }
 
-@mixin glow {
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-}
-
 * {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
 }
@@ -22,16 +18,48 @@
   text-shadow: none;
 }
 
+@keyframes twerk {
+  10%,
+  90% {
+    transform: translate3d(calc(var(--s-twerk) * -1), calc(var(--s-twerk) * 1), 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(calc(var(--s-twerk) * -1), calc(var(--s-twerk) * 1), 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(calc(var(--s-twerk) * 1), calc(var(--s-twerk) * -1), 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(calc(var(--s-twerk) * 1), calc(var(--s-twerk) * 1), 0);
+  }
+}
+
 html {
-  --c-background: rgba(0, 0, 0, 1);
-  --c-interaction: #fff;
+  --s-buttons: 24px;
+  --s-button-interaction-margin: -10px;
+  --s-navigation-height: 48px;
+  --s-navigation-spacing: 4px;
+  --s-twerk: 1px;
+  --c-background: rgba(255, 255, 255, 1);
+  --c-interaction: rgba(0, 0, 0, 1);
   --d-interaction: 0.2s;
+  --d-opacity-computed: 0.5s;
+  --d-thumbs-mask: 0.75s;
+  --d-pictures-mask: 0.5s;
+  --d-pictures-mask-delay: 0.05;
+  --d-pictures-mask-delay-for-thumbs: 0s;
   --e-out: cubic-bezier(0.165, 0.84, 0.44, 1); //quart
   --e-inout: cubic-bezier(0.77, 0, 0.175, 1); //quart
 }
 
 body {
-  background-color: var(--c-background);
   font-family: Mont-Book, Arial, Helvetica, sans-serif;
   color: var(--c-interaction);
   overflow: hidden;
@@ -40,11 +68,12 @@ body {
     content: "";
     display: block;
     position: fixed;
+    z-index: -1;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #fff;
+    background-color: rgba(0, 0, 0, 1);
     transform: scaleX(0);
     transform-origin: top right;
     transition: transform var(--e-inout) 0.5s;
@@ -52,7 +81,8 @@ body {
   }
 
   &.is-inverted {
-    --c-interaction: rgba(0, 0, 0, 0.95);
+    --c-background: rgba(0, 0, 0, 1);
+    --c-interaction: rgba(255, 255, 255, 1);
 
     &::before {
       transform: scaleX(1);
@@ -61,137 +91,477 @@ body {
   }
 }
 
+.logo {
+  --s-loader-position: 29.7%;
+  --s-loaded: 0;
+
+  pointer-events: none;
+  position: fixed;
+  z-index: 5000;
+  top: 50%;
+  left: 50%;
+  transition: opacity linear 0.1s;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background-color: var(--c-interaction);
+    left: -50%;
+    top: var(--s-loader-position);
+    transition: transform var(--e-inout) 0.2s;
+    transform-origin: top left;
+    transform: scaleX(var(--s-loaded));
+  }
+
+  &::before {
+    top: calc(var(--s-loader-position) * -1);
+    transform-origin: top right;
+  }
+
+  .is-loading & {
+    animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
+  }
+
+  .is-loaded & {
+    opacity: 0;
+    transition-delay: 0.3s;
+
+    &::before,
+    &::after {
+      transform: scaleX(0);
+      transform-origin: top right;
+    }
+
+    &::before {
+      transform-origin: top left;
+    }
+  }
+
+  .thumbs-displayed & {
+    mix-blend-mode: overlay;
+  }
+
+  .thumbs-displayed.is-loaded & {
+    opacity: 1;
+    transition-delay: calc(var(--d-pictures-mask) + 10s * var(--d-pictures-mask-delay));
+  }
+
+  .thumbs-displayed.is-inverted & {
+    mix-blend-mode: difference;
+  }
+
+  .thumbs-displayed.no-blend-mode & {
+    mix-blend-mode: initial;
+  }
+
+  &__img {
+    fill: var(--c-interaction);
+    width: auto;
+    height: 50vh;
+    transform: translate(-50%, -50%);
+
+    @media (max-aspect-ratio: 3/2) {
+      width: 75vw;
+      height: auto;
+    }
+  }
+}
+
 .lightmode-button {
-  --s-button: 24px;
+  --s-size: calc(var(--s-buttons) + 4px);
+
+  $root: #{&};
 
   cursor: pointer;
   position: fixed;
-  z-index: 100;
-  overflow: hidden;
-  top: var(--s-margin);
-  right: var(--s-margin);
-  width: var(--s-button);
-  height: var(--s-button);
-  border-radius: 100%;
-  border: 1px solid var(--c-interaction);
-  transition: border-color ease-out var(--d-interaction);
+  z-index: 10000;
+  width: var(--s-size);
+  height: var(--s-size);
 
   &::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
     display: block;
-    width: calc(var(--s-button) * 0.5);
-    height: var(--s-button);
-    background-color: var(--c-interaction);
-    transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
+    top: var(--s-button-interaction-margin);
+    right: var(--s-button-interaction-margin);
+    bottom: var(--s-button-interaction-margin);
+    left: var(--s-button-interaction-margin);
   }
 
-  &:hover {
+  &__circle {
+    display: block;
+    position: absolute;
+    overflow: hidden;
+    width: var(--s-size);
+    height: var(--s-size);
+    border-radius: 100%;
+    border: 2px solid var(--c-interaction);
+    box-sizing: border-box;
+    transition: border-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
+    opacity: 0;
+
+    .is-computed & {
+      opacity: 1;
+    }
+
     &::before {
-      width: var(--s-button);
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: calc(var(--s-buttons) * 0.5);
+      height: var(--s-size);
+      background-color: var(--c-interaction);
+      transition: width var(--e-out) 0.2s, background-color ease-out var(--d-interaction), opacity ease-out var(--d-opacity-computed);
+    }
+
+    @media not all and (hover: none) {
+      #{$root}:hover & {
+        &::before {
+          width: var(--s-size);
+        }
+      }
     }
   }
 }
 
 .pagination {
   position: absolute;
-  font-size: 16px;
+  pointer-events: none;
+  z-index: 10000;
+  font-size: var(--s-buttons);
   width: 5em;
   text-align: right;
-  transform: rotate(90deg) translate(calc(-100% - 24px), -125%);
+  transform: rotate(90deg) translate(calc(-100% - 32px), -100%);
   transform-origin: top left;
-  //text-align: right;
-  //text-shadow: 0 0 5px white, 0 0 10px white;
+  opacity: 0;
+  transition: opacity ease-out var(--d-opacity-computed);
+
+  .is-computed & {
+    opacity: 1;
+  }
 }
 
 .navigation {
   position: fixed;
-  z-index: 200;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity ease-out var(--d-opacity-computed);
+
+  .is-computed & {
+    opacity: 1;
+  }
 }
 
 .navigation-button {
-  --s-height: 48px;
-  --s-width: 24px;
-  --s-spacing: 2px;
   --r-arrow: 45deg;
+
+  $root: #{&};
 
   cursor: pointer;
   display: block;
   position: relative;
-  width: var(--s-width);
-  height: var(--s-height);
-  margin-top: var(--s-spacing);
-  transition: opacity ease-out var(--d-interaction);
+  width: var(--s-buttons);
+  height: var(--s-navigation-height);
+  margin-top: var(--s-navigation-spacing);
 
-  &::before,
-  &::after {
-    @include glow();
-
+  &::before {
     content: "";
+    position: absolute;
+    display: block;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
+  }
+
+  .is-loading & {
+    pointer-events: none;
+  }
+
+  &__arrow {
     display: block;
     position: absolute;
-    width: 50%;
-    height: 1px;
-    top: 0;
-    left: 0;
-    background-color: var(--c-interaction);
-    transform-origin: top right;
-    transform: rotate(0deg);
-    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
-  }
+    width: var(--s-buttons);
+    height: var(--s-navigation-height);
 
-  &::after {
-    left: 50%;
-    transform-origin: bottom left;
-  }
-
-  &:hover {
     &::before,
     &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 50%;
+      height: 2px;
+      top: 0;
+      left: 0;
+      background-color: var(--c-interaction);
+      transform-origin: top right;
       transform: rotate(calc(var(--r-arrow) * -1));
+      transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
     }
 
     &::after {
+      left: 50%;
       transform: rotate(var(--r-arrow));
+      transform-origin: bottom left;
+      margin-left: 1px;
     }
-  }
 
-  &--next {
-    transform: scaleY(-1);
+    @media not all and (hover: none) {
+      &::before,
+      &::after {
+        transform: rotate(0deg);
+      }
+
+      #{$root}:hover & {
+        &::before,
+        &::after {
+          transform: rotate(calc(var(--r-arrow) * -1));
+        }
+
+        &::after {
+          transform: rotate(var(--r-arrow));
+        }
+      }
+    }
+
+    &--next {
+      transform: scaleY(-1);
+    }
   }
 
   &__line {
-    @include glow();
-
     display: block;
     position: absolute;
-    width: 1px;
+    width: 2px;
     height: 100%;
     left: 50%;
     background-color: var(--c-interaction);
     transition: background-color ease-out var(--d-interaction);
   }
+}
 
-  &.is-disabled {
-    opacity: 0;
+.thumbs-button {
+  $root: #{&};
+
+  --s-button: 24px;
+  --s-scale-thumbs-displayed: 1.3;
+  --s-scale-hover: 0.7;
+  --s-translate-hover: 20%;
+
+  cursor: pointer;
+  position: fixed;
+  z-index: 10000;
+  width: var(--s-buttons);
+  height: var(--s-buttons);
+
+  &::before {
+    content: "";
+    position: absolute;
+    display: block;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
+  }
+
+  .is-loading & {
     pointer-events: none;
+  }
+
+  &__burger {
+    display: block;
+    position: absolute;
+    width: var(--s-buttons);
+    height: var(--s-buttons);
+    opacity: 0;
+    transition: opacity ease-out var(--d-opacity-computed);
+
+    .is-computed & {
+      opacity: 1;
+    }
+
+    &::before,
+    &::after {
+      pointer-events: none;
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      top: 0;
+      left: 0;
+      background-color: var(--c-interaction);
+      transform-origin: center center;
+      transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
+    }
+
+    &::after {
+      top: auto;
+      bottom: 0;
+
+      .thumbs-displayed & {
+        transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-thumbs-displayed));
+      }
+    }
+
+    &::before {
+      .thumbs-displayed & {
+        transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-thumbs-displayed));
+      }
+    }
+
+    @media not all and (hover: none) {
+      #{$root}:hover & {
+        &::after,
+        &::before {
+          transform: translateX(calc(var(--s-translate-hover) * -1));
+        }
+
+        .thumbs-displayed & {
+          &::after {
+            transform: translate(0, calc(var(--s-buttons) * -0.5 + 1px)) rotate(-45deg) scaleX(var(--s-scale-hover));
+          }
+
+          &::before {
+            transform: translate(0, calc(var(--s-buttons) * 0.5 - 1px)) rotate(45deg) scaleX(var(--s-scale-hover));
+          }
+        }
+      }
+    }
+  }
+
+  &__line::before {
+    pointer-events: none;
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    top: 50%;
+    left: 0;
+    background-color: var(--c-interaction);
+    transform-origin: center center;
+    transition: transform var(--e-out) 0.2s, background-color ease-out var(--d-interaction);
+    margin-top: -1px;
+
+    @media not all and (hover: none) {
+      #{$root}:hover & {
+        transform: translateX(var(--s-translate-hover));
+
+        .thumbs-displayed & {
+          transform: translateX(0) scaleX(0);
+        }
+      }
+    }
+
+    .thumbs-displayed & {
+      transform: translateX(0) scaleX(0);
+    }
+  }
+}
+
+.thumbs,
+.pictures {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.thumbs {
+  .is-loading & {
+    animation: twerk 0.4s cubic-bezier(0.3, 0.7, 0, 1.5) both infinite;
+    animation-delay: 0.2s;
+  }
+
+  .thumbs-displayed & {
+    pointer-events: auto;
+  }
+}
+
+.thumb {
+  --s-mask-margin: -10px;
+  --s-scale: 0;
+  --s-scale-hover: 1;
+
+  cursor: pointer;
+  position: absolute;
+  display: block;
+  visibility: hidden;
+  transform: scale(var(--s-scale));
+  transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-thumbs-mask);
+
+  .is-loading & {
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: var(--s-mask-margin);
+    bottom: var(--s-mask-margin);
+    left: var(--s-mask-margin);
+    right: var(--s-mask-margin);
+    background-color: var(--c-background);
+    transform-origin: top right;
+    transition: transform var(--e-inout) var(--d-thumbs-mask);
+  }
+
+  &.loaded {
+    .thumbs-displayed & {
+      visibility: visible;
+      transition-delay: 0s, 0s;
+
+      &::after {
+        transform: scaleX(0);
+      }
+    }
+  }
+
+  @media not all and (hover: none) {
+    &:hover {
+      transform: scale(var(--s-scale-hover));
+
+      .thumbs-displayed & {
+        z-index: 6000;
+      }
+    }
+  }
+
+  &__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.pictures {
+  z-index: 0;
+  transition: z-index linear 0s 0.5s;
+
+  .thumbs-displayed & {
+    z-index: -1;
+    pointer-events: none;
+    transition-delay: 0s;
   }
 }
 
 .picture {
   $root: #{&};
 
+  cursor: pointer;
   display: none;
   position: absolute;
   overflow: hidden;
   z-index: 0;
-
-  &.is-loaded {
-    //@extend: block;
-    //faire loader et le retirer las
-  }
+  transition: visibility linear 0s;
 
   &.is-active {
     display: block;
@@ -201,7 +571,14 @@ body {
     z-index: 1;
   }
 
-  &__el {
+  &.is-displayed {
+    .thumbs-displayed & {
+      visibility: hidden;
+      transition-delay: calc(var(--d-pictures-mask) + 10s * var(--d-pictures-mask-delay));
+    }
+  }
+
+  &__img {
     display: block;
     width: 100%;
     transition: transform var(--e-inout) 1.5s;
@@ -214,47 +591,36 @@ body {
     }
   }
 
-  &__mask {
+  &__stripes {
     position: absolute;
     display: flex;
     z-index: 100;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: -2px;
+    top: 0;
+    bottom: 0;
   }
 
-  &__rect {
-    --d-delay: 0.05;
-
+  &__stripe {
     width: 11%;
     height: 100%;
     background-color: var(--c-background);
-    transition: transform var(--e-inout) 0.5s;
+    transition: transform var(--e-inout) var(--d-pictures-mask);
     transform-origin: top left;
     will-change: transform;
 
-    .is-inverted & {
-      background-color: white;
-    }
-
     @for $i from 1 to 11 {
       &:nth-child(#{$i}) {
-        transition-delay: calc(#{$i}s * var(--d-delay));
-      }
-    }
-
-    #{$root}.is-even & {
-      transform-origin: top right;
-
-      @for $i from 1 to 11 {
-        &:nth-child(#{$i}) {
-          transition-delay: calc(#{11-$i}s * var(--d-delay));
-        }
+        transition-delay: calc(#{$i}s * var(--d-pictures-mask-delay) + var(--d-pictures-mask-delay-for-thumbs));
       }
     }
 
     #{$root}.is-displayed & {
       transform: scaleX(0);
+
+      .thumbs-displayed & {
+        transform: scaleX(1);
+      }
     }
   }
 }
