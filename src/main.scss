@@ -487,7 +487,7 @@ body {
 }
 
 .thumb {
-  --s-mask-margin: -2px;
+  --s-mask-margin: -10px;
   --s-scale: 0;
   --s-scale-hover: 1;
 
@@ -497,7 +497,6 @@ body {
   visibility: hidden;
   transform: scale(var(--s-scale));
   transition: transform var(--e-out) 0.35s, visibility linear 0s var(--d-thumbs-mask);
-  background-color: var(--c-background);
 
   .is-loading & {
     pointer-events: none;
