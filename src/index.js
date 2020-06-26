@@ -648,8 +648,10 @@ const App = function () {
   this.checkForPathNameURL = () => {
     if (window.location.pathname.split('/')[1] != '') {
       this.settings.currentID = this.settings.totalPictures - parseInt(window.location.pathname.split('/')[1]);
-      this.settings.displayingImageThrougthHistory = true;
-      this.displayImage(this.settings.currentID);
+      if (this.settings.currentID) {
+        this.settings.displayingImageThrougthHistory = true;
+        this.displayImage(this.settings.currentID);
+      }
     }
   };
 
