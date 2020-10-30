@@ -325,7 +325,7 @@ const App = function () {
     totalPictures: 0,
     currentID: undefined,
     windowPaddingRatioToW: 0.025,
-    imagesFolderURL: '/images/',
+    imagesFolderURL: 'https://files.daviddarx.com/kliclick/',
     imagesHDFolderURL: '_hd/',
     thumbsFolderURL: '_thumbs/',
     thumbsMaxNumber: 100,
