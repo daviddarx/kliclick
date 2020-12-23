@@ -771,6 +771,8 @@ const init = () => {
 //utils
 Image.prototype.load = function(url){
   var thisImg = this;
+  thisImg.crossOrigin = "Anonymous";
+
   var xmlHTTP = new XMLHttpRequest();
   xmlHTTP.open('GET', url,true);
   xmlHTTP.responseType = 'arraybuffer';
@@ -788,6 +790,7 @@ Image.prototype.load = function(url){
 };
 
 Image.prototype.completedPercentage = 0;
+Image.prototype.crossOrigin = "Anonymous";
 
 
 
