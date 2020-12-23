@@ -217,7 +217,7 @@ const Picture = function () {
   this.createImage = () => {
     this.refs.$image = new Image();
     this.refs.$image.crossOrigin = "Anonymous";
-    console.log("test");
+    console.log("test2");
     this.refs.$image.load(this.imgURL);
     this.refs.$image.classList.add('picture__img');
     this.refs.$image.addEventListener('load', this.imageLoadComplete);
